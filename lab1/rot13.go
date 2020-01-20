@@ -4,7 +4,7 @@ package lab1
 
 import (
 	"io"
-)
+	)
 
 /*
 Task 3: Rot 13
@@ -31,5 +31,13 @@ type rot13Reader struct {
 }
 
 func (r rot13Reader) Read(p []byte) (n int, err error) {
-	return 0, nil
+	n, err = r.r.Read(p)
+	for i := 0; i < n; i++ {
+		if (p[i] >= 'A' && p[i] < 'N') || (p[i] >= 'a' && p[i] < 'n') {
+			p[i] += 13
+		} else if (p[i] >= 'N' && p[i] <= 'Z') || (p[i] >= 'n' && p[i] <= 'z') {
+			p[i] -= 13
+		}
+	}
+	return n, err
 }

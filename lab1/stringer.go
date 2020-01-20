@@ -2,6 +2,7 @@
 
 package lab1
 
+
 /*
 Task 2: Stringers
 
@@ -25,6 +26,10 @@ should be printed as
 "Student ID: 42. Name: Doe, John. Age: 25.
 */
 
+import (
+	"strconv"
+)
+
 type Student struct {
 	ID        int
 	FirstName string
@@ -33,5 +38,5 @@ type Student struct {
 }
 
 func (s Student) String() string {
-	return ""
+	return "Student ID: " + strconv.Itoa(s.ID) + ". Name: " + s.LastName + ", " + s.FirstName + ". Age: " + strconv.Itoa(s.Age) + "."
 }

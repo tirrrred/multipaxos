@@ -2,7 +2,9 @@
 
 package lab1
 
-import "io"
+import (
+	"io"
+)
 
 /*
 Task 5: WriteTo function for multiple writers
@@ -36,6 +38,33 @@ that writer's index position.
 
 // WriteTo writes b to the provided writers, returns a slice of the number
 // of byte written to each writer, and a slice of errors, if any.
+
+//type Errors []error
+
 func WriteTo(b []byte, writers ...io.Writer) (n []int, errs Errors) {
-	return []int{}, nil
+
+	//condition 2
+	if len(writers) == 0 {
+		return []int{}, nil
+	}
+
+	//condition 1
+	for _, writer := range writers { //Iterates over the content in the slice writers
+		numb, e := writer.Write(b) //Writes b []byte to each writer in the slice writers.
+
+		//condition 3
+		n = append(n, numb) //Adds the returned n from writer.Write(b) to the n slice
+		//condition 4
+		if numb < len(b) {
+			errs = append(errs, io.ErrShortWrite)
+			continue
+		}
+		errs = append(errs, e) //Adds the returned errs from writer.Write(b) to the errs slice
+	}
+	//condition 5
+	if errs.Error() == "(0 errors)" {
+		return n, nil
+	}
+
+	return n, errs
 }
