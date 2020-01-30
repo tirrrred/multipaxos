@@ -1,5 +1,5 @@
 // A simple UDP based echo client and server.
-package main
+package uecho
 
 import (
 	"flag"

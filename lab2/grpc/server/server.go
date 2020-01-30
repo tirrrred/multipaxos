@@ -1,7 +1,7 @@
 // +build !solution
 
 // Leave an empty line above this comment.
-package main
+package server
 
 import (
 	"flag"
