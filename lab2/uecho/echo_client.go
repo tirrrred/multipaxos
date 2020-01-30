@@ -13,6 +13,7 @@ import (
 // DO NOT EDIT
 func SendCommand(udpAddr, cmd, txt string) (string, error) {
 	addr, err := net.ResolveUDPAddr("udp", udpAddr)
+	fmt.Printf("echo_client - SendCommand: addr = %v %T\n", addr, addr)
 	if err != nil {
 		return "", err
 	}
@@ -27,7 +28,7 @@ func SendCommand(udpAddr, cmd, txt string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	n, err := conn.Read(buf[0:])
+	n, err := conn.Read(buf[0:]) //Gets nothing to read from connection, since the DialUDP is to a socket which is not open/listening on server
 	if err != nil {
 		return "", err
 	}
@@ -43,6 +44,7 @@ var cmdTypes = []string{
 }
 
 func clientLoop(udpAddr string) {
+	fmt.Println("echo_client - clientLoop: udpAddr =", udpAddr)
 	var (
 		scanner *bufio.Scanner = bufio.NewScanner(os.Stdin)
 		ct      int

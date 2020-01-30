@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"sync"
 
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -16,7 +17,8 @@ import (
 )
 
 type keyValueServicesServer struct {
-	kv map[string]string
+	kv  map[string]string
+	mux sync.Mutex
 	// TODO (student): Add fields if needed
 }
 
@@ -47,7 +49,9 @@ func Usage() {
 //         (2)     An error (if any).
 //**************************************************************************************************************
 func (s *keyValueServicesServer) Insert(ctx context.Context, req *pb.InsertRequest) (*pb.InsertResponse, error) {
+	s.mux.Lock() //Locks the map s.kv (only one concurrent request can access it)
 	s.kv[req.Key] = req.Value
+	s.mux.Unlock()
 
 	return &pb.InsertResponse{Success: true}, nil
 }
@@ -61,8 +65,8 @@ func (s *keyValueServicesServer) Insert(ctx context.Context, req *pb.InsertReque
 //**************************************************************************************************************
 func (s *keyValueServicesServer) Lookup(ctx context.Context, req *pb.LookupRequest) (*pb.LookupResponse, error) {
 	// TODO (student): Implement function Lookup
-
-	return &pb.LookupResponse{Value: "Initial value"}, nil
+	val := s.kv[req.Key]
+	return &pb.LookupResponse{Value: val}, nil
 }
 
 //**************************************************************************************************************
@@ -74,8 +78,13 @@ func (s *keyValueServicesServer) Lookup(ctx context.Context, req *pb.LookupReque
 //**************************************************************************************************************
 func (s *keyValueServicesServer) Keys(ctx context.Context, req *pb.KeysRequest) (*pb.KeysResponse, error) {
 	// TODO (student): Implement function Keys
+	var keys []string
+	for k := range s.kv {
+		keys = append(keys, k)
+	}
 
-	return &pb.KeysResponse{Keys: []string{"Initial", "value"}}, nil
+	//how to return keys
+	return &pb.KeysResponse{Keys: keys}, nil
 }
 
 func main() {

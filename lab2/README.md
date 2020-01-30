@@ -145,7 +145,7 @@ func NewUDPServer(addr string) (*UDPServer, error) {
 // ServeUDP starts the UDP server's read loop. The server should read from its
 // listening socket and handle incoming client requests as according to the
 // the specification.
-func (u *UDPServer) ServeUDP() {
+func (u *UDPServer) ServeUDP(cmd, text string) {
 	// TODO(student): Implement
 }
 
