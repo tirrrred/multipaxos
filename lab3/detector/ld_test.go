@@ -1,6 +1,8 @@
 package detector
 
-import "testing"
+import (
+	"testing"
+)
 
 var clsaiTests = []struct {
 	nodes      []int
