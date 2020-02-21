@@ -46,6 +46,9 @@ func NewEvtFailureDetector(id int, nodeIDs []int, sr SuspectRestorer, delta time
 	alive := make(map[int]bool)
 
 	// TODO(student): perform any initialization necessary
+	for _, node := range nodeIDs {
+		alive[node] = true //assumes all provided node IDs is alive (when init fd)
+	}
 
 	return &EvtFailureDetector{
 		id:        id,
@@ -76,8 +79,21 @@ func (e *EvtFailureDetector) Start() {
 		for {
 			e.testingHook() // DO NOT REMOVE THIS LINE. A no-op when not testing.
 			select {
-			case <-e.hbIn:
+			case incHB := <-e.hbIn: //heartbeath comming in
 				// TODO(student): Handle incoming heartbeat
+				if incHB.Request && incHB.To == e.id {
+					//If heartbeat is actual meant for us and it is a request, send reply back to sender
+					hbReply := Heartbeat{To: incHB.From, From: e.id, Request: false}
+					e.ReplyHeartbeat(hbReply)
+				} else if incHB.To != e.id {
+					//The heartbeat message was not meant for us (The To entry dosent match our node ID, e.id)
+					//Do something?
+				} else if incHB.Request == false && incHB.To == e.id {
+					//incHB is a reply (incHB.Request == false)
+					//incHB is addressed to us (incHB.To == e.id)
+					//Set incHB.From to alive
+					e.alive[incHB.From] = true
+				}
 			case <-e.timeoutSignal.C:
 				e.timeout()
 			case <-e.stop:
@@ -100,6 +116,85 @@ func (e *EvtFailureDetector) Stop() {
 // Internal: timeout runs e's timeout procedure.
 func (e *EvtFailureDetector) timeout() {
 	// TODO(student): Implement timeout procedure
+	// Based on Algorithm 2.7: Increasing Timeout at page 55
+	//if alive ∩ suspected != ∅ then:
+	if len(e.intersection(e.alive, e.suspected)) > 0 {
+		//delay := delay +Δ;
+		e.delay = e.delay + e.delta
+	}
+	// forall p ∈ Π do
+	for _, nodeID := range e.nodeIDs {
+		// if (p !∈ alive) ∧ (p !∈ suspected) then
+		if e.inAlive(nodeID) == false && e.inSuspected(nodeID) == false {
+			//suspected := suspected ∪{p};
+			e.suspected[nodeID] = true
+			//trigger P, Suspect | p;
+			e.sr.Suspect(nodeID)
+			//else if (p ∈ alive) ∧ (p ∈ suspected) then
+		} else if e.inAlive(nodeID) && e.inSuspected(nodeID) {
+			//suspected := suspected \{p};
+			delete(e.suspected, nodeID)
+			//e.suspected[nodeID] = false
+			//trigger P, Restore | p;
+			e.sr.Restore(nodeID)
+		}
+		//trigger pl, Send | p, [HEARTBEATREQUEST];
+		hbReq := Heartbeat{From: e.id, To: nodeID, Request: true}
+		e.hbSend <- hbReq
+	}
+	//alive := ∅;
+	emptyAlive := make(map[int]bool)
+	e.alive = emptyAlive
+	//starttimer(delay);
+	e.timeoutSignal.Stop()
+	e.timeoutSignal = time.NewTicker(e.delay)
 }
 
 // TODO(student): Add other unexported functions or methods if needed.
+
+// ReplyHeartbeat replies to incoming heartbeats hb to failure detector e.
+func (e *EvtFailureDetector) ReplyHeartbeat(hb Heartbeat) {
+	e.hbSend <- hb
+}
+
+func (e *EvtFailureDetector) intersection(a, b map[int]bool) []int {
+	var elements []int
+	for keyA := range a {
+		for keyB := range b {
+			if keyA == keyB {
+				elements = append(elements, keyA)
+			}
+		}
+	}
+	return elements
+}
+
+//used?
+func (e *EvtFailureDetector) isAlive(nodeID int) bool {
+	return e.alive[nodeID]
+}
+
+//used?
+func (e *EvtFailureDetector) isSuspected(nodeID int) bool {
+	return e.suspected[nodeID]
+}
+
+// if (p !∈ alive)
+func (e *EvtFailureDetector) inAlive(nodeID int) bool {
+	for node := range e.alive {
+		if nodeID == node {
+			return true
+		}
+	}
+	return false
+}
+
+// if (p !∈ suspected)
+func (e *EvtFailureDetector) inSuspected(nodeID int) bool {
+	for node := range e.suspected {
+		if nodeID == node {
+			return true
+		}
+	}
+	return false
+}

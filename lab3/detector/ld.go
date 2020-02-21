@@ -8,20 +8,25 @@ package detector
 // Reliable and Secure Distributed Programming" Springer, 2nd edition, 2011.
 type MonLeaderDetector struct {
 	// TODO(student): Add needed fields
-	nodes          []int //The Node ID of the leader
-	suspectedNodes []int //slice with suspected nodes
-	leaderNode     int   //ID of the current leader node
+	nodes          []int        //Slice with all node IDs
+	suspectedNodes map[int]bool //Map with all node IDs and if they are suspected (true = suspected)
+	leaderNode     int          //ID of the current leader node
+	subscribers    []chan int   //slice with channels for all subribers. Needs a list so one can publish updates to each subscriber
 }
 
 // NewMonLeaderDetector returns a new Monarchical Eventual Leader Detector
 // given a list of node ids.
 func NewMonLeaderDetector(nodeIDs []int) *MonLeaderDetector {
 	m := &MonLeaderDetector{
-		nodes:      nodeIDs,   // What if the there is no values (nil) in the nodeIDs slice?
-		leaderNode: UnknownID, // Sets the leaderNode entry to "UnkownID" which is a constant int = -1 from defs.go
+		nodes:          nodeIDs, // What if the there is no values (nil) in the nodeIDs slice?
+		suspectedNodes: make(map[int]bool),
+		leaderNode:     UnknownID, // Sets the leaderNode entry to "UnkownID" which is a constant int = -1 from defs.go
 	}
 
-	//m.LeaderChange()
+	changed := m.LeaderChange()
+	if changed {
+		m.Publish()
+	}
 
 	return m
 }
@@ -30,18 +35,6 @@ func NewMonLeaderDetector(nodeIDs []int) *MonLeaderDetector {
 // are suspected.
 func (m *MonLeaderDetector) Leader() int {
 	// TODO(student): Implement
-	for _, nodeID := range m.nodes {
-		suspected := false
-		for _, sNode := range m.suspectedNodes {
-			if nodeID == sNode {
-				suspected = true
-				break //Assumes it is only uniqe node IDs in cluster
-			}
-		}
-		if suspected == false && nodeID > m.leaderNode {
-			m.leaderNode = nodeID
-		}
-	}
 	return m.leaderNode
 }
 
@@ -50,7 +43,13 @@ func (m *MonLeaderDetector) Leader() int {
 // this publish this change its subscribers.
 func (m *MonLeaderDetector) Suspect(id int) {
 	// TODO(student): Implement
-	m.suspectedNodes = append(m.suspectedNodes, id)
+	m.suspectedNodes[id] = true
+	if id == m.leaderNode {
+		changed := m.LeaderChange()
+		if changed {
+			m.Publish()
+		}
+	}
 }
 
 // Restore instructs m to consider the node with matching id as restored. If
@@ -58,9 +57,11 @@ func (m *MonLeaderDetector) Suspect(id int) {
 // this publish this change its subscribers.
 func (m *MonLeaderDetector) Restore(id int) {
 	// TODO(student): Implement
-	for i, sID := range m.suspectedNodes { //Iterate through all suspected Node IDs in m.suspectedNodes
-		if sID == id { //If the suspected node id is equal to the given node id to restore do...
-			m.suspectedNodes = append(m.suspectedNodes[:i], m.suspectedNodes[i+1:]...) //Modify m.suspectedNodes slice. Removes the entry with the resotred node ID at index i
+	m.suspectedNodes[id] = false
+	if id >= m.leaderNode {
+		changed := m.LeaderChange()
+		if changed {
+			m.Publish()
 		}
 	}
 }
@@ -72,34 +73,30 @@ func (m *MonLeaderDetector) Restore(id int) {
 // subscriber; it is not meant to be shared.
 func (m *MonLeaderDetector) Subscribe() <-chan int {
 	// TODO(student): Implement
-	//c := make(chan int)
-	//c <- m.leaderNode
-	//return c
-	return nil
+	c := make(chan int, 1)                   //makes a channel for subscribing process
+	m.subscribers = append(m.subscribers, c) //Appends the newly creates channel to the list of all subscribers (with their channels)
+	return c                                 //returns the channel to the subscriber
+
 }
 
 // LeaderChange is used to change leaderNode in the struct MonLeaderDetector
 func (m *MonLeaderDetector) LeaderChange() bool {
-	for _, nodeID := range m.nodes {
-		suspected := false
-		for _, sNode := range m.suspectedNodes {
-			if nodeID == sNode {
-				suspected = true
-				//break
-			}
-		}
-		if suspected == false && nodeID > m.leaderNode {
-			m.leaderNode = nodeID
+	ln := UnknownID //Reset leaderNode ID
+	for _, node := range m.nodes {
+		if node > ln && m.suspectedNodes[node] == false { //If node is bigger than ln and not suspected...
+			ln = node //set ln = node id
 		}
 	}
-	for _, nodeID := range m.nodes {
-
-	}
-	if newLeader != m.leaderNode {
+	if ln != m.leaderNode {
+		m.leaderNode = ln
 		return true
-	} else {
-		return false
 	}
+	return false
 }
 
-// TODO(student): Add other unexported functions or methods if needed.
+// Publish the new nodeLeader to all subscribers in m.subscribers (over "dedicated" channels)
+func (m *MonLeaderDetector) Publish() { //look into creating goroutines?
+	for _, c := range m.subscribers {
+		c <- m.leaderNode
+	}
+}

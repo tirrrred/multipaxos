@@ -1,0 +1,21 @@
+
+{
+    "myself": 1,
+    "nodes": [
+        {
+            "id": 0,
+            "ip": "localhost", 
+            "port": 5000
+        },
+        {
+            "id": 1,
+            "ip": "localhost",
+            "port": 5001
+        },
+        {
+            "id": 2,
+            "ip": "localhost",
+            "port": 5002
+        }
+    ]
+}
