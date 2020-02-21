@@ -17,8 +17,9 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println(appnet)
-	appnet.InitConns()
 	appnet.StartServer()
+	appnet.InitConns()
+
 }
 
 func importNetConf() (network.NetConfig, error) {
