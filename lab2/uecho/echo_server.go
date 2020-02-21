@@ -48,6 +48,7 @@ func (u *UDPServer) ServeUDP() {
 
 	defer serverConn.Close() //look into defer
 
+	// run loop forever (or until ctrl-c)
 	for {
 		buffer := make([]byte, 512, 1024)
 		n, srcadr, err := u.conn.ReadFromUDP(buffer[0:])

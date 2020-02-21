@@ -1,12 +1,13 @@
 package network
 
 import (
-	"bufio"
+	//"bufio"
 	"fmt"
 	"log"
 	"net"
-	"os"
+	//"os"
 	"strconv"
+	"strings"
 )
 
 //NetConfig struct has network information to be used for configuration of network. How you are in the network (node id) and how is every one else in the network
@@ -73,6 +74,7 @@ func (n *Network) InitConns() (err error) {
 		}
 		n.Connections[node.ID] = TCPconn
 	}
+	fmt.Println(n.Connections)
 	return err
 }
 
@@ -90,64 +92,25 @@ func (n *Network) StartServer() error {
 
 		// run loop forever (or until ctrl-c)
 		for {
+			//Accept TCP connections to application server
 			TCPconn, err := TCPln.AcceptTCP() //func() (*net.TCPConn, error)
 			if err != nil {
 				log.Fatal(err)
 				continue
 			}
-			//RemoteHost := TCPconn.RemoteAddr() //Do I need this RemoteHost (TCP Scoket)?
-
-			buffer := make([]byte, 1024, 1024) //Channel??
-			n, err := TCPconn.Read(buffer[0:])
-
-			recData := string(buffer[0:n])
-			fmt.Println(recData)
-
-			//Creates a terminal chat to test TCP connectivity and Docker setup
-			reader := bufio.NewReader(os.Stdin) //func(rd io.Reader) *bufio.Reader - NewReader returns a new Reader whose buffer has the default size.
-			sendData, _ := reader.ReadString('\n')
-			sendByte := []byte(sendData)
-			TCPconn.Write(sendByte)
-
+			//Find node ID from the remote connection
+			RemoteSocket := TCPconn.RemoteAddr()
+			RemoteIPPort := strings.Split(RemoteSocket.String(), ":")
+			RemoteIP := RemoteIPPort[0]
+			//Add remote connection to n.Connection with node.ID as key and TCPconn as value
+			for _, node := range n.Nodes {
+				if node.IP == RemoteIP {
+					n.Connections[node.ID] = TCPconn
+				}
+			}
+			fmt.Println(n.Connections)
 		}
 	}(TCPln)
 
 	return err
 }
-
-/*
-func newServer(server Server) (*net.TCPConn, error) {
-	lSocket := server.ip + ":" + strconv.Itoa(server.port)
-	lAddr, err := net.ResolveTCPAddr("tcp", lSocket) //func(network string, address string) (*net.TCPAddr, error)
-	if err != nil {
-		log.Fatal(err)
-		return nil, err
-	}
-	TCPln, err := net.ListenTCP("tcp", lAddr) //func(network string, laddr *net.TCPAddr) (*net.TCPListener, error)
-	if err != nil {
-		log.Fatal(err)
-		return TCPln, err
-	}
-	return TCPln, nil
-}
-
-func startServer() {
-
-}
-
-func startTcpServer() error {
-	lnTCP, err := net.ListenTCP("tcp", "localhost:5000") //Func(network string, laddr *net.TCPAddr) (*net.TCPListener, error)
-	return error
-}
-
-func tcpConnect() error {
-	connTCP, err := net.DialTCP("tcp", "localhost:5001") //func(network string, laddr *net.TCPAddr, raddr *net.TCPAddr) (*net.TCPConn, error)
-	if err != nil {
-		log.Fatal(err)
-	}
-	reader := bufio.NewReader(clientConn)
-	writer := bufio.NewWriter(clientConn)
-
-	return error
-}
-*/

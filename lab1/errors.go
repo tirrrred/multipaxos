@@ -52,17 +52,17 @@ The first error + " (and X other errors)"
 */
 func (m Errors) Error() string {
 
-	errList := Errors{} 									//Creates a list/slice that stores numbers of errors inputed
+	errList := Errors{} //Creates a list/slice that stores numbers of errors inputed
 
-	for i := 0; i < len(m); i++ { 							//iterates all the inputed items
-		switch m[i].(type) {								//type assertions to check if the inputed values is an error
-		case error:											// If the inputed value is an error:
-			errList = append(errList, m[i])					//add the value to the list/slice
-		default:											// If not an error:
-			continue										// Continue the loop/iteration
+	for i := 0; i < len(m); i++ { //iterates all the "inputed" items
+		switch m[i].(type) { //type assertions to check if the inputed values is an error
+		case error: // If the inputed value is an error:
+			errList = append(errList, m[i]) //add the value to the list/slice
+		default: // If not an error:
+			continue // Continue the loop/iteration
 		}
 	}
-	errLen := len(errList)									//To solve the test, check the len of the list and return given statements based on number of errors in list
+	errLen := len(errList) //To solve the test, check the len of the list and return given statements based on number of errors in list
 	switch {
 	case errLen == 0:
 		return "(0 errors)"
@@ -71,7 +71,7 @@ func (m Errors) Error() string {
 	case errLen == 2:
 		return errList[0].Error() + " (and 1 other error)"
 	case errLen > 2:
-		return errList[0].Error() + " (and " + strconv.Itoa(errLen - 1) + " other errors)"
+		return errList[0].Error() + " (and " + strconv.Itoa(errLen-1) + " other errors)"
 	}
 	return ""
 }
