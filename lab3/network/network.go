@@ -34,6 +34,10 @@ type Network struct {
 
 //Message struct
 type Message struct {
+	To      int //Node ID
+	From    int // Node ID
+	Msg     string
+	Request bool // true -> request, false -> reply
 }
 
 //InitNetwork defines necessary parameteres about the network
@@ -68,13 +72,13 @@ func InitNetwork(nodes []Node, myself int) (network Network, err error) {
 func (n *Network) InitConns() (err error) {
 	//Connect to each node in network
 	for _, node := range n.Nodes {
-		fmt.Printf("DialTCP to node %v\n", node)
 		TCPconn, err := net.DialTCP("tcp", nil, node.TCPaddr) //func(network string, laddr *net.TCPAddr, raddr *net.TCPAddr) (*net.TCPConn, error)
 		if err != nil {
 			log.Print(err)
+		} else {
+			n.Connections[node.ID] = TCPconn
+			fmt.Printf("DialTCP to node %v\n", node.TCPaddr)
 		}
-		n.Connections[node.ID] = TCPconn
-		fmt.Printf("Connection to node %v: %v\n", node, n.Connections[node.ID])
 	}
 	fmt.Println(n.Connections)
 	return err
@@ -83,7 +87,7 @@ func (n *Network) InitConns() (err error) {
 //StartServer start the TCP listener on application host
 func (n *Network) StartServer() (err error) {
 	TCPln, err := net.ListenTCP("tcp", n.Myself.TCPaddr) //func(network string, laddr *net.TCPAddr) (*net.TCPListener, error)
-	fmt.Printf("Server listener for node %v: %v\n", n.Myself.TCPaddr, TCPln)
+	fmt.Printf("TCP Server for node %v at %v\n", n.Myself.ID, n.Myself.TCPaddr)
 	if err != nil {
 		log.Print(err)
 		return err
@@ -105,9 +109,31 @@ func (n *Network) StartServer() (err error) {
 		for _, node := range n.Nodes {
 			if node.IP == RemoteIP {
 				n.Connections[node.ID] = TCPconn
+				n.Connections[node.ID] = TCPconn
+				fmt.Printf("AcceptTCP from node %v\n", TCPconn.RemoteAddr())
 			}
 		}
-		fmt.Println(n.Connections)
 	}
+	return err
+}
+
+//SendToNode sends messages to nodeID
+func (n *Network) SendToNode(nodeID int, msg string) (err error) {
+	msg = "Test Message From Node " + strconv.Itoa(nodeID)
+	/*message := Message{
+		To:      nodeID,
+		From:    n.Myself.ID,
+		Msg:     msg,
+		Request: true,
+	}*/
+
+	msgByte := []byte(msg)
+	n.Connections[nodeID].Write(msgByte)
+
+	return err
+}
+
+//ReceiveMessage receives messages from other nodes in network
+func (n *Network) ReceiveMessage() (err error) {
 	return err
 }
