@@ -68,50 +68,46 @@ func InitNetwork(nodes []Node, myself int) (network Network, err error) {
 func (n *Network) InitConns() (err error) {
 	//Connect to each node in network
 	for _, node := range n.Nodes {
+		fmt.Printf("DialTCP to node %v\n", node)
 		TCPconn, err := net.DialTCP("tcp", nil, node.TCPaddr) //func(network string, laddr *net.TCPAddr, raddr *net.TCPAddr) (*net.TCPConn, error)
 		if err != nil {
-			log.Fatal(err)
-			continue
+			log.Print(err)
 		}
 		n.Connections[node.ID] = TCPconn
+		fmt.Printf("Connection to node %v: %v\n", node, n.Connections[node.ID])
 	}
 	fmt.Println(n.Connections)
 	return err
 }
 
 //StartServer start the TCP listener on application host
-func (n *Network) StartServer() error {
+func (n *Network) StartServer() (err error) {
 	TCPln, err := net.ListenTCP("tcp", n.Myself.TCPaddr) //func(network string, laddr *net.TCPAddr) (*net.TCPListener, error)
+	fmt.Printf("Server listener for node %v: %v\n", n.Myself.TCPaddr, TCPln)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 		return err
 	}
 	n.Myself.TCPListen = TCPln
-
-	go func(TCPln *net.TCPListener) {
-		defer TCPln.Close()
-
-		// run loop forever (or until ctrl-c)
-		for {
-			//Accept TCP connections to application server
-			TCPconn, err := TCPln.AcceptTCP() //func() (*net.TCPConn, error)
-			if err != nil {
-				log.Fatal(err)
-				continue
-			}
-			//Find node ID from the remote connection
-			RemoteSocket := TCPconn.RemoteAddr()
-			RemoteIPPort := strings.Split(RemoteSocket.String(), ":")
-			RemoteIP := RemoteIPPort[0]
-			//Add remote connection to n.Connection with node.ID as key and TCPconn as value
-			for _, node := range n.Nodes {
-				if node.IP == RemoteIP {
-					n.Connections[node.ID] = TCPconn
-				}
-			}
-			fmt.Println(n.Connections)
+	defer TCPln.Close()
+	// run loop forever (or until ctrl-c)
+	for {
+		//Accept TCP connections to application server
+		TCPconn, err := TCPln.AcceptTCP() //func() (*net.TCPConn, error)
+		if err != nil {
+			log.Print(err)
 		}
-	}(TCPln)
-
+		//Find node ID from the remote connection
+		RemoteSocket := TCPconn.RemoteAddr()
+		RemoteIPPort := strings.Split(RemoteSocket.String(), ":")
+		RemoteIP := RemoteIPPort[0]
+		//Add remote connection to n.Connection with node.ID as key and TCPconn as value
+		for _, node := range n.Nodes {
+			if node.IP == RemoteIP {
+				n.Connections[node.ID] = TCPconn
+			}
+		}
+		fmt.Println(n.Connections)
+	}
 	return err
 }

@@ -14,7 +14,7 @@ func main() {
 	netconf, _ := importNetConf()
 	appnet, err := network.InitNetwork(netconf.Nodes, netconf.Myself)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	fmt.Println(appnet)
 	appnet.StartServer()
@@ -26,7 +26,7 @@ func importNetConf() (network.NetConfig, error) {
 	//Open the network config file for the application
 	netConfFile, err := os.Open("netConf.json")
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 	}
 	defer netConfFile.Close()
 
@@ -38,7 +38,7 @@ func importNetConf() (network.NetConfig, error) {
 
 	err = json.Unmarshal(byteValue, &netconf)
 	if err != nil {
-		log.Fatal(err)
+		log.Print(err)
 		return netconf, err
 	}
 
