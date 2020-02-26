@@ -178,18 +178,26 @@ func (n *Network) ReceiveMessage(nodeID int) (message Message, err error) {
 //HandleConns handle TCP connections
 func (n *Network) HandleConns(TCPconn *net.TCPConn) (err error) {
 	buffer := make([]byte, 1024, 1024)
-	len, err := TCPconn.Read(buffer[0:])
-	//Prints the recived output for testing
-	for _, v := range buffer[0:len] {
-		fmt.Println(v)
+	for {
+		len, err := TCPconn.Read(buffer[0:])
+		if err != nil {
+			log.Print("Error reading from TCPconn")
+		}
+		//Prints the recived output for testing
+		for _, v := range buffer[0:len] {
+			fmt.Println(v)
+		}
+		clientInputstr := string(buffer[0:len])
+		if clientInputstr == "Hei" {
+			nodeID := n.findRemoteAddr(TCPconn)
+			n.SendMessage(nodeID, "done")
+			fmt.Printf("Message from node%d: %v", nodeID, clientInputstr)
+		} else if clientInputstr == "done" {
+			fmt.Println("Sent hei, and now I recived done")
+			break
+		}
 	}
-	clientInputstr := string(buffer[0:len])
-	if clientInputstr == "Hei" {
-		nodeID := n.findRemoteAddr(TCPconn)
-		n.SendMessage(nodeID, "done")
-	} else if clientInputstr == "done" {
-		fmt.Println("Sent hei, and now I recived done")
-	}
+
 	return err
 }
 
