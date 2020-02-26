@@ -180,21 +180,20 @@ func (n *Network) HandleConns(TCPconn *net.TCPConn) (err error) {
 	buffer := make([]byte, 1024, 1024)
 	for {
 		len, _ := TCPconn.Read(buffer[0:])
-		//Prints the recived output for testing
-		for _, v := range buffer[0:len] {
-			fmt.Println(v)
-		}
 		clientInputstr := string(buffer[0:len])
 		if clientInputstr == "Hei" {
 			nodeID := n.findRemoteAddr(TCPconn)
 			n.SendMessage(nodeID, "done")
 			fmt.Printf("Message from node%d: %v", nodeID, clientInputstr)
 		} else if clientInputstr == "done" {
-			fmt.Println("Sent hei, and now I recived done")
+			fmt.Println("Sent hei, and now I recived done. BREAK!")
 			break
 		}
+		sent := 0
+		if sent == 0 && n.Myself.ID == 0 {
+			n.SendMessage(0, "Hei")
+		}
 	}
-
 	return err
 }
 

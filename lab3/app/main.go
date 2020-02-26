@@ -48,7 +48,7 @@ func main() {
 	appnet.InitConns()
 	appnet.StartServer()
 
-	err = appnet.SendMessage(1, arguments[1])
+	//err = appnet.SendMessage(1, arguments[1])
 	if err != nil {
 		log.Print(err)
 	}
