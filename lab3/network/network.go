@@ -179,10 +179,7 @@ func (n *Network) ReceiveMessage(nodeID int) (message Message, err error) {
 func (n *Network) HandleConns(TCPconn *net.TCPConn) (err error) {
 	buffer := make([]byte, 1024, 1024)
 	for {
-		len, err := TCPconn.Read(buffer[0:])
-		if err != nil {
-			log.Print("Error reading from TCPconn")
-		}
+		len, _ := TCPconn.Read(buffer[0:])
 		//Prints the recived output for testing
 		for _, v := range buffer[0:len] {
 			fmt.Println(v)
