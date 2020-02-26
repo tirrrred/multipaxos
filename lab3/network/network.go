@@ -179,6 +179,11 @@ func (n *Network) ReceiveMessage(nodeID int) (message Message, err error) {
 func (n *Network) HandleConns(TCPconn *net.TCPConn) (err error) {
 	buffer := make([]byte, 1024, 1024)
 	for {
+		sent := 0
+		if sent == 0 && n.Myself.ID == 0 {
+			n.SendMessage(0, "Hei")
+			fmt.Println("Message sent to node0 with text 'Hei'")
+		}
 		len, _ := TCPconn.Read(buffer[0:])
 		clientInputstr := string(buffer[0:len])
 		if clientInputstr == "Hei" {
@@ -188,10 +193,6 @@ func (n *Network) HandleConns(TCPconn *net.TCPConn) (err error) {
 		} else if clientInputstr == "done" {
 			fmt.Println("Sent hei, and now I recived done. BREAK!")
 			break
-		}
-		sent := 0
-		if sent == 0 && n.Myself.ID == 0 {
-			n.SendMessage(0, "Hei")
 		}
 	}
 	return err
