@@ -139,7 +139,6 @@ func (n *Network) StartServer() (err error) {
 		//Handle connections
 		go n.HandleConns(TCPconn)
 	}
-
 	return err
 }
 
@@ -178,6 +177,7 @@ func (n *Network) ReceiveMessage(nodeID int) (message Message, err error) {
 //HandleConns handle TCP connections
 func (n *Network) HandleConns(TCPconn *net.TCPConn) (err error) {
 	buffer := make([]byte, 1024, 1024)
+	fmt.Println("At HandleConns func now")
 	for {
 		sent := 0
 		if sent == 0 && n.Myself.ID == 0 {
