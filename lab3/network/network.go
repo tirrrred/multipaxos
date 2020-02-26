@@ -137,7 +137,7 @@ func (n *Network) StartServer() (err error) {
 		}
 
 		//Handle connections
-		go n.HandleConns(TCPconn)
+		go n.ListenConns(TCPconn)
 	}
 	return err
 }
@@ -174,25 +174,25 @@ func (n *Network) ReceiveMessage(nodeID int) (message Message, err error) {
 	}
 }
 
-//HandleConns handle TCP connections
-func (n *Network) HandleConns(TCPconn *net.TCPConn) (err error) {
+//ListenConns handle TCP connections
+func (n *Network) ListenConns(TCPconn *net.TCPConn) (err error) {
 	buffer := make([]byte, 1024, 1024)
-	fmt.Println("At HandleConns func now")
+	nodeID := n.findRemoteAddr(TCPconn)
+	fmt.Println("At HandleConns func now. Connection from: ", nodeID)
 	for {
-		sent := 0
-		if sent == 0 && n.Myself.ID == 0 {
-			n.SendMessage(0, "Hei")
-			fmt.Println("Message sent to node0 with text 'Hei'")
-		}
 		len, _ := TCPconn.Read(buffer[0:])
 		clientInputstr := string(buffer[0:len])
 		if clientInputstr == "Hei" {
-			nodeID := n.findRemoteAddr(TCPconn)
 			n.SendMessage(nodeID, "done")
 			fmt.Printf("Message from node%d: %v", nodeID, clientInputstr)
 		} else if clientInputstr == "done" {
 			fmt.Println("Sent hei, and now I recived done. BREAK!")
 			break
+		}
+		err = n.SendMessage(n.Myself.ID+1, "Hei")
+		if err != nil {
+			fmt.Printf("Error sending from node%d to node%d", n.Myself.ID, (n.Myself.ID + 1))
+			return err
 		}
 	}
 	return err
@@ -200,7 +200,10 @@ func (n *Network) HandleConns(TCPconn *net.TCPConn) (err error) {
 
 //SendMessage sends a message
 func (n *Network) SendMessage(NodeID int, message string) (err error) {
-	n.Connections[NodeID].Write(([]byte(message)))
+	_, err = n.Connections[NodeID].Write(([]byte(message)))
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
