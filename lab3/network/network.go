@@ -6,8 +6,11 @@ import (
 	"log"
 	"net"
 	//"os"
+	"encoding/json"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 )
 
 //NetConfig struct has network information to be used for configuration of network. How you are in the network (node id) and how is every one else in the network
@@ -40,6 +43,8 @@ type Message struct {
 	Request bool // true -> request, false -> reply
 }
 
+var mutex = &sync.Mutex{}
+
 //InitNetwork defines necessary parameteres about the network
 func InitNetwork(nodes []Node, myself int) (network Network, err error) {
 	network = Network{
@@ -68,6 +73,21 @@ func InitNetwork(nodes []Node, myself int) (network Network, err error) {
 	return network, err
 }
 
+//EstablishNetwork starts server, Init connections to nodes
+func (n *Network) EstablishNetwork() (err error) {
+	err = n.InitConns()
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+	err = n.StartServer()
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+	return err
+}
+
 //InitConns start TCP server on application and initiation TCP connection to other nodes in network
 func (n *Network) InitConns() (err error) {
 	//Connect to each node in network
@@ -94,46 +114,65 @@ func (n *Network) StartServer() (err error) {
 	}
 	n.Myself.TCPListen = TCPln
 	defer TCPln.Close()
-	// run loop forever (or until ctrl-c)
-	for {
-		//Accept TCP connections to application server
-		TCPconn, err := TCPln.AcceptTCP() //func() (*net.TCPConn, error)
-		if err != nil {
-			log.Print(err)
-		}
-		//Find node ID from the remote connection
-		RemoteSocket := TCPconn.RemoteAddr()
-		RemoteIPPort := strings.Split(RemoteSocket.String(), ":")
-		RemoteIP := RemoteIPPort[0]
-		//Add remote connection to n.Connection with node.ID as key and TCPconn as value
-		for _, node := range n.Nodes {
-			if node.IP == RemoteIP {
-				n.Connections[node.ID] = TCPconn
-				n.Connections[node.ID] = TCPconn
-				fmt.Printf("AcceptTCP from node %v\n", TCPconn.RemoteAddr())
+
+	go func(TCPln *net.TCPListener) {
+		// run loop forever (or until ctrl-c)
+		for {
+			//Accept TCP connections to application server
+			TCPconn, err := TCPln.AcceptTCP() //func() (*net.TCPConn, error)
+			if err != nil {
+				log.Print(err)
+			}
+			//Find node ID from the remote connection
+			RemoteSocket := TCPconn.RemoteAddr()
+			RemoteIPPort := strings.Split(RemoteSocket.String(), ":")
+			RemoteIP := RemoteIPPort[0]
+			//Add remote connection to n.Connection with node.ID as key and TCPconn as value
+			for _, node := range n.Nodes {
+				if node.IP == RemoteIP {
+					mutex.Lock()
+					n.Connections[node.ID] = TCPconn
+					mutex.Unlock()
+					fmt.Printf("AcceptTCP from node %v\n", TCPconn.RemoteAddr())
+				}
+				//Listen for messages on Conn
+				go n.ReceiveMessage(node.ID)
+				go n.SendToNode(node.ID)
 			}
 		}
-	}
+	}(TCPln)
+
 	return err
 }
 
 //SendToNode sends messages to nodeID
-func (n *Network) SendToNode(nodeID int, msg string) (err error) {
-	msg = "Test Message From Node " + strconv.Itoa(nodeID)
+func (n *Network) SendToNode(nodeID int) (err error) {
+	msg := "Test Message From Node " + strconv.Itoa(nodeID)
 	/*message := Message{
 		To:      nodeID,
 		From:    n.Myself.ID,
 		Msg:     msg,
 		Request: true,
 	}*/
-
 	msgByte := []byte(msg)
-	n.Connections[nodeID].Write(msgByte)
-
+	for i := 0; i < 60; i++ {
+		time.Sleep(2 * time.Second)
+		n.Connections[nodeID].Write(msgByte)
+	}
 	return err
 }
 
 //ReceiveMessage receives messages from other nodes in network
-func (n *Network) ReceiveMessage() (err error) {
-	return err
+func (n *Network) ReceiveMessage(nodeID int) (message Message, err error) {
+	for {
+		buffer := make([]byte, 1024, 1024)
+		len, err := n.Connections[nodeID].Read(buffer[0:]) //func(b []byte) (int, error)
+		//Prints the recived output for testing
+		for _, v := range buffer[0:len] {
+			fmt.Println(v)
+		}
+		message := new(Message)
+		err = json.Unmarshal(buffer[0:len], &message)
+		return *message, err
+	}
 }

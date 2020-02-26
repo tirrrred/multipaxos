@@ -3,10 +3,12 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/tirrrred/multipaxos/lab3/detector"
 	"github.com/tirrrred/multipaxos/lab3/network"
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 )
 
 func main() {
@@ -16,9 +18,40 @@ func main() {
 	if err != nil {
 		log.Print(err)
 	}
-	fmt.Println(appnet)
-	appnet.InitConns()
-	appnet.StartServer()
+
+	nodeIDs := []int{}
+	for _, node := range appnet.Nodes {
+		nodeIDs = append(nodeIDs, node.ID)
+	}
+	//create leader detector
+	ld := detector.NewMonLeaderDetector(nodeIDs) //*MonLeaderDetector
+
+	//subscribe to leader changes
+	ldSubscribtion := ld.Subscribe()
+
+	//create failure detector
+	hbChan := make(chan detector.Heartbeat, 16)
+	fd := detector.NewEvtFailureDetector(appnet.Myself.ID, nodeIDs, ld, 1*time.Second, hbChan) //how to get things sent on the hbChan onto the network???
+
+	fmt.Println(fd) //Remove
+
+	appnet.EstablishNetwork()
+	fmt.Println("InitConns and StartServer done")
+
+	osSignalChan := make(chan os.Signal, 1)
+
+	for {
+		select {
+		case NewLeader := <-ldSubscribtion:
+			log.Printf("\nApplication %d: LEADER CHANGE - New leader is: %d \n", appnet.Myself.ID, NewLeader)
+		case <-osSignalChan:
+			appnet.Myself.TCPListen.Close()
+			appnet.Myself.TCPListen = nil
+			os.Exit(0)
+		default:
+			log.Printf("\nApplication %d: Default message....", appnet.Myself.ID)
+		}
+	}
 }
 
 func importNetConf() (network.NetConfig, error) {
