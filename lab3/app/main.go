@@ -13,6 +13,14 @@ import (
 
 func main() {
 	fmt.Println("Hello main app")
+
+	//**Get arguments from command line START**//
+	arguments := os.Args
+	if len(arguments) == 1 {
+		fmt.Println("Need one argument: Text to send")
+
+	}
+	//**Get arguments from command line END**//
 	netconf, _ := importNetConf()
 	appnet, err := network.InitNetwork(netconf.Nodes, netconf.Myself)
 	if err != nil {
@@ -27,7 +35,7 @@ func main() {
 	ld := detector.NewMonLeaderDetector(nodeIDs) //*MonLeaderDetector
 
 	//subscribe to leader changes
-	ldSubscribtion := ld.Subscribe()
+	//ldSubscribtion := ld.Subscribe()
 
 	//create failure detector
 	hbChan := make(chan detector.Heartbeat, 16)
@@ -35,23 +43,30 @@ func main() {
 
 	fmt.Println(fd) //Remove
 
-	appnet.EstablishNetwork()
 	fmt.Println("InitConns and StartServer done")
 
-	osSignalChan := make(chan os.Signal, 1)
+	appnet.InitConns()
+	appnet.StartServer()
 
-	for {
-		select {
-		case NewLeader := <-ldSubscribtion:
-			log.Printf("\nApplication %d: LEADER CHANGE - New leader is: %d \n", appnet.Myself.ID, NewLeader)
-		case <-osSignalChan:
-			appnet.Myself.TCPListen.Close()
-			appnet.Myself.TCPListen = nil
-			os.Exit(0)
-		default:
-			log.Printf("\nApplication %d: Default message....", appnet.Myself.ID)
-		}
+	err = appnet.SendMessage(1, arguments[1])
+	if err != nil {
+		log.Print(err)
 	}
+
+	//osSignalChan := make(chan os.Signal, 1)
+	/*
+		for {
+			select {
+			case NewLeader := <-ldSubscribtion:
+				log.Printf("\nApplication %d: LEADER CHANGE - New leader is: %d \n", appnet.Myself.ID, NewLeader)
+			case <-osSignalChan:
+				appnet.Myself.TCPListen.Close()
+				appnet.Myself.TCPListen = nil
+				os.Exit(0)
+			default:
+				log.Printf("\nApplication %d: Default message....", appnet.Myself.ID)
+			}
+		} */
 }
 
 func importNetConf() (network.NetConfig, error) {
