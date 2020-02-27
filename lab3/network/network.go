@@ -182,6 +182,7 @@ func (n *Network) ListenConns(TCPconn *net.TCPConn) (err error) {
 	for {
 		len, _ := TCPconn.Read(buffer[0:])
 		clientInputstr := string(buffer[0:len])
+		fmt.Println(clientInputstr)
 		if clientInputstr == "Hei" {
 			n.SendMessage(nodeID, "done")
 			fmt.Printf("Message from node%d: %v", nodeID, clientInputstr)
@@ -195,6 +196,7 @@ func (n *Network) ListenConns(TCPconn *net.TCPConn) (err error) {
 			return err
 		}
 	}
+	fmt.Println("Below for/while loop")
 	return err
 }
 
