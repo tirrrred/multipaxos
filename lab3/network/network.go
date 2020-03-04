@@ -147,7 +147,7 @@ func (n *Network) StartServer() (err error) {
 	}()
 	go func() { //Function to listen on sendChan for messages to send to other network nodes
 		for {
-			message := <-n.sendChan
+			message := <-n.SendChan
 			err := n.SendMessage(message)
 			if err != nil {
 				fmt.Println("Error: Sending message to network node failed")
@@ -166,7 +166,7 @@ func (n *Network) ListenConns(TCPconn *net.TCPConn) (err error) {
 		len, _ := TCPconn.Read(buffer[0:])
 		message := new(Message)
 		err = json.Unmarshal(buffer[0:len], &message)
-		n.receiveChan <- *message
+		n.ReceiveChan <- *message
 	}
 
 	/*for {
