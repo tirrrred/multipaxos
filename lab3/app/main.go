@@ -26,13 +26,12 @@ func main() {
 	}
 	//create leader detector
 	ld := detector.NewMonLeaderDetector(nodeIDs) //*MonLeaderDetector
-
 	//subscribe to leader changes
-	//ldSubscribtion := ld.Subscribe()
+	ldChan := ld.Subscribe()
 
 	//create failure detector
-	hbChan := make(chan detector.Heartbeat, 16)
-	fd := detector.NewEvtFailureDetector(appnet.Myself.ID, nodeIDs, ld, 1*time.Second, hbChan) //how to get things sent on the hbChan onto the network???
+	hbSend := make(chan detector.Heartbeat, 16)
+	fd := detector.NewEvtFailureDetector(appnet.Myself.ID, nodeIDs, ld, 1*time.Second, hbSend) //how to get things sent on the hbChan onto the network???
 
 	fmt.Println(fd) //Remove
 
@@ -41,25 +40,34 @@ func main() {
 	appnet.StartServer()
 	fmt.Println("InitConns and StartServer done")
 
-	//err = appnet.SendMessage(1, arguments[1])
-	if err != nil {
-		log.Print(err)
+	fd.Start()
+
+	for {
+		select {
+		case newLeader := <-ldChan: //If ld publish a new leader
+			fmt.Printf("\nNew leader: %d \n", newLeader)
+		case hb := <-hbSend: //If hb recived from fd.hbSend channel? **Is hbSenc the correct channel here?**
+			fmt.Printf("\n{From: %v, To: %v, Request: %v}\n", hb.From, hb.To, hb.Request)
+			//Send hearbeat
+			sendHBmsg := network.Message{
+				To:      hb.To,
+				From:    hb.From,
+				Msg:     "",
+				Request: hb.Request,
+			}
+			appnet.sendChan <- sendHBmsg //Send sendHBmsg on sendChan
+		case receivedHBmsg := <-appnet.receiveChan: //If recivedHBmsg from receiveChan
+			hb := detector.Heartbeat{
+				To:      receivedHBmsg.To,
+				From:    receivedHBmsg.From,
+				Request: receivedHBmsg.Request,
+			}
+			fmt.Printf("\n{From: %v, To: %v, Request: %v}\n", hb.From, hb.To, hb.Request)
+			fd.DeliverHeartbeat(hb) //Deliver hearbeat to fd
+		}
+
 	}
 
-	//osSignalChan := make(chan os.Signal, 1)
-	/*
-		for {
-			select {
-			case NewLeader := <-ldSubscribtion:
-				log.Printf("\nApplication %d: LEADER CHANGE - New leader is: %d \n", appnet.Myself.ID, NewLeader)
-			case <-osSignalChan:
-				appnet.Myself.TCPListen.Close()
-				appnet.Myself.TCPListen = nil
-				os.Exit(0)
-			default:
-				log.Printf("\nApplication %d: Default message....", appnet.Myself.ID)
-			}
-		} */
 }
 
 func importNetConf() (network.NetConfig, error) {
