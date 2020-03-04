@@ -2,10 +2,6 @@
 
 package detector
 
-import (
-	"time"
-)
-
 // A MonLeaderDetector represents a Monarchical Eventual Leader Detector as
 // described at page 53 in:
 // Christian Cachin, Rachid Guerraoui, and Luís Rodrigues: "Introduction to
