@@ -192,6 +192,10 @@ func (n *Network) ListenConns(TCPconn *net.TCPConn) (err error) {
 func (n *Network) SendMessage(message Message) (err error) {
 	messageByte, _ := json.Marshal(message) //func(v interface{}) ([]byte, error)
 	_, err = n.Connections[message.To].Write(messageByte)
+	if err != nil {
+		log.Print(err)
+		return err
+	}
 	return err
 }
 
