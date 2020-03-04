@@ -55,8 +55,8 @@ func main() {
 				Msg:     "",
 				Request: hb.Request,
 			}
-			appnet.sendChan <- sendHBmsg //Send sendHBmsg on sendChan
-		case receivedHBmsg := <-appnet.receiveChan: //If recivedHBmsg from receiveChan
+			appnet.SendChan <- sendHBmsg //Send sendHBmsg on sendChan
+		case receivedHBmsg := <-appnet.ReceiveChan: //If recivedHBmsg from receiveChan
 			hb := detector.Heartbeat{
 				To:      receivedHBmsg.To,
 				From:    receivedHBmsg.From,
