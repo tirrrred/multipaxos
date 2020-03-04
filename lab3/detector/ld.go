@@ -2,6 +2,10 @@
 
 package detector
 
+import (
+	"time"
+)
+
 // A MonLeaderDetector represents a Monarchical Eventual Leader Detector as
 // described at page 53 in:
 // Christian Cachin, Rachid Guerraoui, and Luís Rodrigues: "Introduction to
@@ -97,6 +101,12 @@ func (m *MonLeaderDetector) LeaderChange() bool {
 // Publish the new nodeLeader to all subscribers in m.subscribers (over "dedicated" channels)
 func (m *MonLeaderDetector) Publish() { //look into creating goroutines?
 	for _, c := range m.subscribers {
-		c <- m.leaderNode
+		select {
+		case c <- m.leaderNode:
+			break
+		case <-time.After(100 * time.Millisecond):
+			continue
+		}
+
 	}
 }
