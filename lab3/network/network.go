@@ -33,8 +33,8 @@ type Network struct {
 	Myself      Node
 	Nodes       []Node
 	Connections map[int]*net.TCPConn
-	receiveChan chan Message
-	sendChan    chan Message
+	ReceiveChan chan Message
+	SendChan    chan Message
 }
 
 //Message struct
@@ -54,8 +54,8 @@ func InitNetwork(nodes []Node, myself int) (network Network, err error) {
 	network = Network{
 		Nodes:       []Node{},
 		Connections: map[int]*net.TCPConn{},
-		receiveChan: rC,
-		sendChan:    sC,
+		ReceiveChan: rC,
+		SendChan:    sC,
 	}
 
 	for _, node := range nodes {
