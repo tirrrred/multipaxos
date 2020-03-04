@@ -147,7 +147,7 @@ func (n *Network) StartServer() (err error) {
 	go func() { //Function to listen on sendChan for messages to send to other network nodes
 		for {
 			message := <-n.SendChan
-			fmt.Println(message)
+			//fmt.Println(message)
 			err := n.SendMessage(message)
 			if err != nil {
 				fmt.Println("Error: Sending message to network node failed")
