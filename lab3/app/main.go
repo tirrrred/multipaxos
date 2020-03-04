@@ -47,7 +47,7 @@ func main() {
 		case newLeader := <-ldChan: //If ld publish a new leader
 			fmt.Printf("\nNew leader: %d \n", newLeader)
 		case hb := <-hbSend: //If hb recived from fd.hbSend channel? **Is hbSenc the correct channel here?**
-			fmt.Printf("\n{From: %v, To: %v, Request: %v}\n", hb.From, hb.To, hb.Request)
+			//fmt.Printf("\n{From: %v, To: %v, Request: %v}\n", hb.From, hb.To, hb.Request)
 			//Send hearbeat
 			sendHBmsg := network.Message{
 				To:      hb.To,
@@ -62,7 +62,7 @@ func main() {
 				From:    receivedHBmsg.From,
 				Request: receivedHBmsg.Request,
 			}
-			fmt.Printf("\n{From: %v, To: %v, Request: %v}\n", hb.From, hb.To, hb.Request)
+			//fmt.Printf("\n{From: %v, To: %v, Request: %v}\n", hb.From, hb.To, hb.Request)
 			fd.DeliverHeartbeat(hb) //Deliver hearbeat to fd
 		}
 
