@@ -147,6 +147,7 @@ func (n *Network) StartServer() (err error) {
 	go func() { //Function to listen on sendChan for messages to send to other network nodes
 		for {
 			message := <-n.SendChan
+			fmt.Println(message)
 			err := n.SendMessage(message)
 			if err != nil {
 				fmt.Println("Error: Sending message to network node failed")
@@ -190,6 +191,8 @@ func (n *Network) ListenConns(TCPconn *net.TCPConn) (err error) {
 
 //SendMessage sends a message
 func (n *Network) SendMessage(message Message) (err error) {
+	mutex.Lock()
+	defer mutex.Unlock()
 	messageByte, err := json.Marshal(message) //func(v interface{}) ([]byte, error)
 	if err != nil {
 		log.Print(err)
