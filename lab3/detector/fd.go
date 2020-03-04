@@ -85,9 +85,6 @@ func (e *EvtFailureDetector) Start() {
 					//If heartbeat is actual meant for us and it is a request, send reply back to sender
 					hbReply := Heartbeat{To: incHB.From, From: e.id, Request: false}
 					e.ReplyHeartbeat(hbReply)
-				} else if incHB.To != e.id {
-					//The heartbeat message was not meant for us (The To entry dosent match our node ID, e.id)
-					//Do something?
 				} else if incHB.Request == false && incHB.To == e.id {
 					//incHB is a reply (incHB.Request == false)
 					//incHB is addressed to us (incHB.To == e.id)

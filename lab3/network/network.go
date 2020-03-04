@@ -125,7 +125,7 @@ func (n *Network) StartServer() (err error) {
 			//Accept TCP connections to application server
 			TCPconn, err := TCPln.AcceptTCP() //func() (*net.TCPConn, error)
 			if err != nil {
-				log.Print(err) //This fails: accept tcp 10.0.0.102:5002: use of closed network connection
+				log.Print(err)
 			}
 			//Find node ID from the remote connection
 			RemoteSocket := TCPconn.RemoteAddr()
@@ -168,24 +168,6 @@ func (n *Network) ListenConns(TCPconn *net.TCPConn) (err error) {
 		err = json.Unmarshal(buffer[0:len], &message)
 		n.ReceiveChan <- *message
 	}
-
-	/*for {
-		len, _ := TCPconn.Read(buffer[0:])
-		clientInputstr := string(buffer[0:len])
-		//fmt.Printf("Message from node%d: %v of type %T", nodeID, clientInputstr, clientInputstr)
-		if clientInputstr == "Hei\n" {
-			n.SendMessage(nodeID, "done")
-			fmt.Printf("Message from node%d: %v", nodeID, clientInputstr)
-		} else if clientInputstr == "done" {
-			fmt.Println("Sent hei, and now I recived done. BREAK!")
-			break
-		}
-		err = n.SendMessage(n.Myself.ID+1, "Hei")
-		if err != nil {
-			fmt.Printf("Error sending from node%d to node%d", n.Myself.ID, (n.Myself.ID + 1))
-			return err
-		}
-	}*/
 	return err
 }
 

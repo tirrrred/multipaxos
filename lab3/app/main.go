@@ -29,7 +29,7 @@ func main() {
 
 	//create failure detector
 	hbSend := make(chan detector.Heartbeat, 16)
-	fd := detector.NewEvtFailureDetector(appnet.Myself.ID, nodeIDs, ld, 1*time.Second, hbSend) //how to get things sent on the hbChan onto the network???
+	fd := detector.NewEvtFailureDetector(appnet.Myself.ID, nodeIDs, ld, 5*time.Second, hbSend) //how to get things sent on the hbChan onto the network???
 
 	//fmt.Println(fd) //Remove
 
@@ -45,7 +45,7 @@ func main() {
 		select {
 		case newLeader := <-ldChan: //If ld publish a new leader
 			fmt.Printf("\nNew leader: %d \n", newLeader)
-		case hb := <-hbSend: //If hb recived from fd.hbSend channel? **Is hbSenc the correct channel here?**
+		case hb := <-hbSend: //If hb reply
 			fmt.Printf("\n{From: %v, To: %v, Request: %v}\n", hb.From, hb.To, hb.Request)
 			//Send hearbeat
 			sendHBmsg := network.Message{
