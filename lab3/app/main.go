@@ -14,13 +14,6 @@ import (
 func main() {
 	fmt.Println("Hello main app")
 
-	//**Get arguments from command line START**//
-	arguments := os.Args
-	if len(arguments) == 1 {
-		fmt.Println("Need one argument: Text to send")
-
-	}
-	//**Get arguments from command line END**//
 	netconf, _ := importNetConf()
 	appnet, err := network.InitNetwork(netconf.Nodes, netconf.Myself)
 	if err != nil {
@@ -43,10 +36,10 @@ func main() {
 
 	fmt.Println(fd) //Remove
 
-	fmt.Println("InitConns and StartServer done")
-
+	fmt.Println("InitConns and StartServer")
 	appnet.InitConns()
 	appnet.StartServer()
+	fmt.Println("InitConns and StartServer done")
 
 	//err = appnet.SendMessage(1, arguments[1])
 	if err != nil {

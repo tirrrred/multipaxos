@@ -183,7 +183,7 @@ func (n *Network) ListenConns(TCPconn *net.TCPConn) (err error) {
 		len, _ := TCPconn.Read(buffer[0:])
 		clientInputstr := string(buffer[0:len])
 		fmt.Printf("Message from node%d: %v of type %T", nodeID, clientInputstr, clientInputstr)
-		if clientInputstr == "Hei" {
+		if clientInputstr == "Hei\n" {
 			n.SendMessage(nodeID, "done")
 			fmt.Printf("Message from node%d: %v", nodeID, clientInputstr)
 		} else if clientInputstr == "done" {
