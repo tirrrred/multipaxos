@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"time"
+	//"time"
 )
 
 //NetConfig struct has network information to be used for configuration of network. How you are in the network (node id) and how is every one else in the network
@@ -191,6 +191,7 @@ func (n *Network) ListenConns(TCPconn *net.TCPConn) (err error) {
 func (n *Network) SendMessage(message Message) (err error) {
 	messageByte, _ := json.Marshal(message) //func(v interface{}) ([]byte, error)
 	_, err = n.Connections[message.To].Write(messageByte)
+	return err
 }
 
 func (n *Network) findRemoteAddr(TCPconn *net.TCPConn) int {
