@@ -106,7 +106,6 @@ func (n *Network) InitConns() (err error) {
 			fmt.Printf("DialTCP to node %v\n", node.TCPaddr)
 		}
 	}
-	fmt.Println(n.Connections)
 	return err
 }
 
@@ -119,14 +118,14 @@ func (n *Network) StartServer() (err error) {
 		return err
 	}
 	n.Myself.TCPListen = TCPln
-	defer TCPln.Close()
 
 	go func() { //Fucntion to listen for TCP connections
+		defer TCPln.Close()
 		for {
 			//Accept TCP connections to application server
 			TCPconn, err := TCPln.AcceptTCP() //func() (*net.TCPConn, error)
 			if err != nil {
-				log.Print(err)
+				log.Print(err) //This fails: accept tcp 10.0.0.102:5002: use of closed network connection
 			}
 			//Find node ID from the remote connection
 			RemoteSocket := TCPconn.RemoteAddr()
