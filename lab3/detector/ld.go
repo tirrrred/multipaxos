@@ -101,12 +101,6 @@ func (m *MonLeaderDetector) LeaderChange() bool {
 // Publish the new nodeLeader to all subscribers in m.subscribers (over "dedicated" channels)
 func (m *MonLeaderDetector) Publish() { //look into creating goroutines?
 	for _, c := range m.subscribers {
-		select {
-		case c <- m.leaderNode:
-			break
-		case <-time.After(100 * time.Millisecond):
-			continue
-		}
-
+		c <- m.leaderNode
 	}
 }

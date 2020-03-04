@@ -46,7 +46,7 @@ func main() {
 		case newLeader := <-ldChan: //If ld publish a new leader
 			fmt.Printf("\nNew leader: %d \n", newLeader)
 		case hb := <-hbSend: //If hb reply
-			fmt.Printf("\n{From: %v, To: %v, Request: %v}\n", hb.From, hb.To, hb.Request)
+			//fmt.Printf("\n{From: %v, To: %v, Request: %v}\n", hb.From, hb.To, hb.Request)
 			//Send hearbeat
 			sendHBmsg := network.Message{
 				To:      hb.To,
@@ -54,6 +54,7 @@ func main() {
 				Msg:     "",
 				Request: hb.Request,
 			}
+			fmt.Printf("\nappnet.SendChan <- sendHBmsg: %v\n", sendHBmsg)
 			appnet.SendChan <- sendHBmsg //Send sendHBmsg on sendChan
 		case receivedHBmsg := <-appnet.ReceiveChan: //If recivedHBmsg from receiveChan
 			hb := detector.Heartbeat{
@@ -61,7 +62,8 @@ func main() {
 				From:    receivedHBmsg.From,
 				Request: receivedHBmsg.Request,
 			}
-			fmt.Printf("\n{From: %v, To: %v, Request: %v}\n", hb.From, hb.To, hb.Request)
+			//fmt.Printf("\n{From: %v, To: %v, Request: %v}\n", hb.From, hb.To, hb.Request)
+			fmt.Printf("\nfd.DeliverHeartbeat(hb): %v\n", hb)
 			fd.DeliverHeartbeat(hb) //Deliver hearbeat to fd
 		}
 
