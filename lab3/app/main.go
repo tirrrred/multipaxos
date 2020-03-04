@@ -33,7 +33,7 @@ func main() {
 	hbSend := make(chan detector.Heartbeat, 16)
 	fd := detector.NewEvtFailureDetector(appnet.Myself.ID, nodeIDs, ld, 1*time.Second, hbSend) //how to get things sent on the hbChan onto the network???
 
-	fmt.Println(fd) //Remove
+	//fmt.Println(fd) //Remove
 
 	fmt.Println("InitConns and StartServer")
 	appnet.InitConns()
