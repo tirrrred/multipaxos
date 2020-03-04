@@ -149,6 +149,9 @@ func (n *Network) StartServer() (err error) {
 		for {
 			message := <-n.sendChan
 			err := n.SendMessage(message)
+			if err != nil {
+				fmt.Println("Error: Sending message to network node failed")
+			}
 		}
 	}()
 	return err
@@ -183,7 +186,6 @@ func (n *Network) ListenConns(TCPconn *net.TCPConn) (err error) {
 			return err
 		}
 	}*/
-	fmt.Println("Below for/while loop")
 	return err
 }
 
