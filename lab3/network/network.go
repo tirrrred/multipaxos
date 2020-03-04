@@ -201,6 +201,7 @@ func (n *Network) SendMessage(message Message) (err error) {
 	remoteConn := n.Connections[message.To]
 	if remoteConn == nil {
 		fmt.Printf("Connection to node %d isnt present in n.Connections", message.To)
+		return err
 	}
 	_, err = n.Connections[message.To].Write(messageByte)
 	if err != nil {
