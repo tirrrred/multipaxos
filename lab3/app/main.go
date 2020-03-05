@@ -54,7 +54,7 @@ func main() {
 				Msg:     "random message",
 				Request: hb.Request,
 			}
-			fmt.Printf("\nappnet.SendChan <- sendHBmsg: %v\n", sendHBmsg)
+			//fmt.Printf("\nappnet.SendChan <- sendHBmsg: %v\n", sendHBmsg)
 			appnet.SendChan <- sendHBmsg //Send sendHBmsg on sendChan
 		case receivedHBmsg := <-appnet.ReceiveChan: //If recivedHBmsg from receiveChan
 			hb := detector.Heartbeat{
