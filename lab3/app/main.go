@@ -24,6 +24,7 @@ func main() {
 	for _, node := range appnet.Nodes {
 		nodeIDs = append(nodeIDs, node.ID)
 	}
+	nodeIDs = append(nodeIDs, appnet.Myself.ID)
 	fmt.Printf("\n nodeIDs from main.go: %v \n", nodeIDs)
 	//create leader detector
 	ld := detector.NewMonLeaderDetector(nodeIDs) //*MonLeaderDetector
