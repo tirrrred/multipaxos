@@ -87,7 +87,7 @@ func (e *EvtFailureDetector) Start() {
 				if incHB.Request && incHB.To == e.id {
 					//If heartbeat is actual meant for us and it is a request, send reply back to sender
 					hbReply := Heartbeat{To: incHB.From, From: e.id, Request: false}
-					fmt.Printf("\nfd.go recived incoming HB and creates reply: {To: %d From: %d Request: %v}\n", incHB.From, e.id, false)
+					//fmt.Printf("\nfd.go recived incoming HB and creates reply: {To: %d From: %d Request: %v}\n", incHB.From, e.id, false)
 					e.ReplyHeartbeat(hbReply)
 				} else if incHB.Request == false && incHB.To == e.id {
 					//incHB is a reply (incHB.Request == false)
