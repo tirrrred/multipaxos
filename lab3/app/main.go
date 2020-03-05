@@ -41,14 +41,14 @@ func main() {
 	fmt.Println("InitConns and StartServer done")
 	//subscribe to leader changes
 	ldChan := ld.Subscribe()
-	fmt.Printf("\nLeader after ld init and subsribtion: %d", ld.Leader())
+	fmt.Printf("\nLeader after ld init and subsribtion: %d\n", ld.Leader())
 	fd.Start()
 
 	for {
 		select {
 		case newLeader := <-ldChan: //If ld publish a new leader
 			fmt.Printf("\nNew leader: %d \n", newLeader)
-			fmt.Printf("Suspected nodes at ld: %v", ld.SuspectedNodes)
+			fmt.Printf("\nSuspected nodes at ld: %v\n", ld.SuspectedNodes)
 		case hb := <-hbSend: //If hb reply
 			//fmt.Printf("\n{From: %v, To: %v, Request: %v}\n", hb.From, hb.To, hb.Request)
 			//Send hearbeat

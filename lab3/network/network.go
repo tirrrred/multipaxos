@@ -200,7 +200,7 @@ func (n *Network) SendMessage(message Message) (err error) {
 	//fmt.Printf("\nReady to send message over conn %v: %v\n", n.Connections[message.To], message)
 	_, err = n.Connections[message.To].Write(messageByte)
 	if err != nil {
-		log.Print(err)
+		//log.Print(err)
 		return err
 	}
 	return err
