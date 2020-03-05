@@ -117,7 +117,7 @@ func (n *Network) StartServer() (err error) {
 	TCPln, err := net.ListenTCP("tcp", n.Myself.TCPaddr) //func(network string, laddr *net.TCPAddr) (*net.TCPListener, error)
 	fmt.Printf("TCP Server for node %v at %v\n", n.Myself.ID, n.Myself.TCPaddr)
 	if err != nil {
-		log.Print(err)
+		//log.Print(err)
 		return err
 	}
 	n.Myself.TCPListen = TCPln
