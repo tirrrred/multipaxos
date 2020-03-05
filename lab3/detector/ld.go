@@ -44,12 +44,12 @@ func (m *MonLeaderDetector) Leader() int {
 func (m *MonLeaderDetector) Suspect(id int) {
 	// TODO(student): Implement
 	m.suspectedNodes[id] = true
-	if id == m.leaderNode {
-		changed := m.LeaderChange()
-		if changed {
-			m.Publish()
-		}
+	//if id == m.leaderNode {
+	changed := m.LeaderChange()
+	if changed {
+		m.Publish()
 	}
+	//}
 }
 
 // Restore instructs m to consider the node with matching id as restored. If
@@ -58,12 +58,12 @@ func (m *MonLeaderDetector) Suspect(id int) {
 func (m *MonLeaderDetector) Restore(id int) {
 	// TODO(student): Implement
 	m.suspectedNodes[id] = false
-	if id >= m.leaderNode {
-		changed := m.LeaderChange()
-		if changed {
-			m.Publish()
-		}
+	//if id >= m.leaderNode {
+	changed := m.LeaderChange()
+	if changed {
+		m.Publish()
 	}
+	//}
 }
 
 // Subscribe returns a buffered channel that m on leader change will use to
