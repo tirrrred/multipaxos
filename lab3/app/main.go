@@ -51,7 +51,7 @@ func main() {
 			sendHBmsg := network.Message{
 				To:      hb.To,
 				From:    hb.From,
-				Msg:     "",
+				Msg:     "random message",
 				Request: hb.Request,
 			}
 			fmt.Printf("\nappnet.SendChan <- sendHBmsg: %v\n", sendHBmsg)
