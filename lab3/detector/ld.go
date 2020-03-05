@@ -9,7 +9,7 @@ package detector
 type MonLeaderDetector struct {
 	// TODO(student): Add needed fields
 	nodes          []int        //Slice with all node IDs
-	suspectedNodes map[int]bool //Map with all node IDs and if they are suspected (true = suspected)
+	SuspectedNodes map[int]bool //Map with all node IDs and if they are suspected (true = suspected)
 	leaderNode     int          //ID of the current leader node
 	subscribers    []chan int   //slice with channels for all subribers. Needs a list so one can publish updates to each subscriber
 }
@@ -19,7 +19,7 @@ type MonLeaderDetector struct {
 func NewMonLeaderDetector(nodeIDs []int) *MonLeaderDetector {
 	m := &MonLeaderDetector{
 		nodes:          nodeIDs, // What if the there is no values (nil) in the nodeIDs slice?
-		suspectedNodes: make(map[int]bool),
+		SuspectedNodes: make(map[int]bool),
 		leaderNode:     UnknownID, // Sets the leaderNode entry to "UnkownID" which is a constant int = -1 from defs.go
 	}
 
@@ -43,7 +43,7 @@ func (m *MonLeaderDetector) Leader() int {
 // this publish this change its subscribers.
 func (m *MonLeaderDetector) Suspect(id int) {
 	// TODO(student): Implement
-	m.suspectedNodes[id] = true
+	m.SuspectedNodes[id] = true
 	//if id == m.leaderNode {
 	changed := m.LeaderChange()
 	if changed {
@@ -57,7 +57,7 @@ func (m *MonLeaderDetector) Suspect(id int) {
 // this publish this change its subscribers.
 func (m *MonLeaderDetector) Restore(id int) {
 	// TODO(student): Implement
-	m.suspectedNodes[id] = false
+	m.SuspectedNodes[id] = false
 	//if id >= m.leaderNode {
 	changed := m.LeaderChange()
 	if changed {
@@ -83,7 +83,7 @@ func (m *MonLeaderDetector) Subscribe() <-chan int {
 func (m *MonLeaderDetector) LeaderChange() bool {
 	ln := UnknownID //Reset leaderNode ID
 	for _, node := range m.nodes {
-		if node > ln && m.suspectedNodes[node] == false { //If node is bigger than ln and not suspected...
+		if node > ln && m.SuspectedNodes[node] == false { //If node is bigger than ln and not suspected...
 			ln = node //set ln = node id
 		}
 	}
