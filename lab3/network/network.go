@@ -105,6 +105,8 @@ func (n *Network) InitConns() (err error) {
 			n.Connections[node.ID] = TCPconn
 			fmt.Printf("DialTCP to node %v\n", node.TCPaddr)
 		}
+		//Handle connections
+		go n.ListenConns(TCPconn)
 	}
 	return err
 }
