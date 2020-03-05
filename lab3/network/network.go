@@ -101,6 +101,7 @@ func (n *Network) InitConns() (err error) {
 		TCPconn, err := net.DialTCP("tcp", nil, node.TCPaddr) //func(network string, laddr *net.TCPAddr, raddr *net.TCPAddr) (*net.TCPConn, error)
 		if err != nil {
 			log.Print(err)
+			return err
 		} else {
 			n.Connections[node.ID] = TCPconn
 			fmt.Printf("DialTCP to node %v\n", node.TCPaddr)
