@@ -172,10 +172,12 @@ func (n *Network) ListenConns(TCPconn *net.TCPConn) (err error) {
 	return err
 }
 
+var syncMutex = &sync.Mutex{}
+
 //SendMessage sends a message
 func (n *Network) SendMessage(message Message) (err error) {
-	mutex.Lock()
-	defer mutex.Unlock()
+	syncMutex.Lock()
+	defer syncMutex.Unlock()
 	messageByte, err := json.Marshal(message) //func(v interface{}) ([]byte, error)
 	if err != nil {
 		log.Print(err)
