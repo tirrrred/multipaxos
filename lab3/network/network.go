@@ -169,7 +169,7 @@ func (n *Network) ListenConns(TCPconn *net.TCPConn) (err error) {
 		len, _ := TCPconn.Read(buffer[0:])
 		message := new(Message)
 		err = json.Unmarshal(buffer[0:len], &message)
-		fmt.Printf("\nReceived message over conn %v: %v\n", TCPconn, *message)
+		//fmt.Printf("\nReceived message over conn %v: %v\n", TCPconn, *message)
 		n.ReceiveChan <- *message
 	}
 	return err
@@ -191,7 +191,7 @@ func (n *Network) SendMessage(message Message) (err error) {
 		//fmt.Printf("Connection to node %d isnt present in n.Connections", message.To)
 		return err
 	}
-	fmt.Printf("\nReady to send message over conn %v: %v\n", n.Connections[message.To], message)
+	//fmt.Printf("\nReady to send message over conn %v: %v\n", n.Connections[message.To], message)
 	_, err = n.Connections[message.To].Write(messageByte)
 	if err != nil {
 		log.Print(err)

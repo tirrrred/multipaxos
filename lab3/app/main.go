@@ -63,7 +63,7 @@ func main() {
 				Request: receivedHBmsg.Request,
 			}
 			//fmt.Printf("\n{From: %v, To: %v, Request: %v}\n", hb.From, hb.To, hb.Request)
-			fmt.Printf("\nfd.DeliverHeartbeat(hb): %v\n", hb)
+			//fmt.Printf("\nfd.DeliverHeartbeat(hb): %v\n", hb)
 			fd.DeliverHeartbeat(hb) //Deliver hearbeat to fd
 		}
 
