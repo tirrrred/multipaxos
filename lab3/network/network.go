@@ -166,6 +166,7 @@ func (n *Network) ListenConns(TCPconn *net.TCPConn) (err error) {
 		len, _ := TCPconn.Read(buffer[0:])
 		message := new(Message)
 		err = json.Unmarshal(buffer[0:len], &message)
+		fmt.Printf("\nReceived message over conn %v: %v\n", TCPconn, *message)
 		n.ReceiveChan <- *message
 	}
 	return err
