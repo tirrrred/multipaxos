@@ -2,7 +2,7 @@
 
 package singlepaxos
 
-import "dat520.github.io/lab3/detector"
+import "dat520/lab3/detector"
 
 // Proposer represents a proposer as defined by the single-decree Paxos
 // algorithm.
