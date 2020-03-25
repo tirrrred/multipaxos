@@ -12,7 +12,7 @@ import (
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
-	pb "github.com/dat520-2020/assignments/lab2/grpc/proto"
+	pb "dat520/lab2/grpc/proto"
 )
 
 type keyValueServicesServer struct {
