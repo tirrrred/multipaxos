@@ -187,7 +187,7 @@ func (n *Network) ListenConns(TCPconn *net.TCPConn) (err error) {
 		message := new(Message)
 		err = json.Unmarshal(buffer[0:len], &message)
 		if nodeID == -1 { //Assumes nodeID -1 is a client
-			message.Type = "Client"
+			message.Type = "Value"
 		}
 		//fmt.Printf("\nReceived message over conn %v: %v\n", TCPconn, *message)
 		n.ReceiveChan <- *message
