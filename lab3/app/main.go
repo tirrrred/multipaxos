@@ -1,5 +1,9 @@
 package main
 
+//TO add based on LAB4:
+//Unicast and brodcast. Only "Promise" messsages is unicast (has a 'to' field). Learn, Accept and Prepare are all broadcast
+//Use it own NodeID as unique round number (rnd). Current round = (Crnd) and Voted round = (Vrnd) -> Type conversion. IncreaseCrnd adds the number of Paxos nodes to this unique round number (NodeID)
+
 import (
 	"encoding/json"
 	"fmt"

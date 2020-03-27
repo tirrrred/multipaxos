@@ -2,13 +2,23 @@
 
 package singlepaxos
 
-import "dat520.github.io/lab3/detector"
+import "github.com/tirrrred/multipaxos/lab3/detector"
 
 // Proposer represents a proposer as defined by the single-decree Paxos
 // algorithm.
 type Proposer struct {
-	crnd        Round
-	clientValue Value
+	crnd             Round
+	clientValue      Value
+	ConstrainedValue Value
+	ID               int
+	NumNodes         int
+	PromiseRequests  []Promise
+	LeaderDetector   detector.LeaderDetector
+	PrepareOutChan   chan<- Prepare
+	AcceptOutChan    chan<- Accept
+	promiseChan      chan Promise
+	clientValueChan  chan Value
+	stopChan         chan int
 
 	//TODO(student): Task 2 and 3 - algorithm and distributed implementation
 	// Add other needed fields
@@ -29,7 +39,20 @@ type Proposer struct {
 // its id.
 func NewProposer(id int, nrOfNodes int, ld detector.LeaderDetector, prepareOut chan<- Prepare, acceptOut chan<- Accept) *Proposer {
 	//TODO(student): Task 2 and 3 - algorithm and distributed implementation
-	return &Proposer{}
+	return &Proposer{
+		crnd:             Round(id),
+		clientValue:      ZeroValue,
+		ConstrainedValue: ZeroValue,
+		ID:               id,
+		NumNodes:         nrOfNodes,
+		PromiseRequests:  []Promise{},
+		LeaderDetector:   ld,
+		PrepareOutChan:   prepareOut,
+		AcceptOutChan:    acceptOut,
+		promiseChan:      make(chan Promise),
+		clientValueChan:  make(chan Value),
+		stopChan:         make(chan int),
+	}
 }
 
 // Start starts p's main run loop as a separate goroutine. The main run loop
@@ -38,6 +61,18 @@ func (p *Proposer) Start() {
 	go func() {
 		for {
 			//TODO(student): Task 3 - distributed implementation
+			select {
+			case prm := <-p.promiseChan:
+				if accMsg, sendMsg := p.handlePromise(prm); sendMsg == true {
+					p.AcceptOutChan <- accMsg
+				}
+			case cVal := <-p.clientValueChan:
+				if prpMsg, sendMsg := p.clientHandler(cVal); sendMsg == true {
+					p.PrepareOutChan <- prpMsg
+				}
+			case <-p.stopChan:
+				break
+			}
 		}
 	}()
 }
@@ -45,16 +80,19 @@ func (p *Proposer) Start() {
 // Stop stops p's main run loop.
 func (p *Proposer) Stop() {
 	//TODO(student): Task 3 - distributed implementation
+	p.stopChan <- 0
 }
 
 // DeliverPromise delivers promise prm to proposer p.
 func (p *Proposer) DeliverPromise(prm Promise) {
 	//TODO(student): Task 3 - distributed implementation
+	p.promiseChan <- prm
 }
 
 // DeliverClientValue delivers client value val from to proposer p.
 func (p *Proposer) DeliverClientValue(val Value) {
 	//TODO(student): Task 3 - distributed implementation
+	p.clientValueChan <- val
 }
 
 // Internal: handlePromise processes promise prm according to the single-decree
@@ -64,13 +102,76 @@ func (p *Proposer) DeliverClientValue(val Value) {
 // struct.
 func (p *Proposer) handlePromise(prm Promise) (acc Accept, output bool) {
 	//TODO(student): Task 2 - algorithm implementation
-	return Accept{From: -1, Rnd: -2, Val: "FooBar"}, true
+	//v = Desired Consensus Value
+	//crnd = Current Round (unique)
+	//cval = Constrained Consensus Value, i.e not freely choosen by the client/proposer.
+	//vrnd = Round in which a Value was Last Accepted
+	//vval = Value Last Accepted
+	if prm.Rnd > p.crnd {
+		p.crnd = prm.Rnd
+		p.PromiseRequests = nil
+		return Accept{}, false
+	} else if prm.Rnd < p.crnd || prm.Rnd == NoRound {
+		return Accept{}, false
+	}
+
+	for _, prmReq := range p.PromiseRequests {
+		if prmReq.From == prm.From { //If we already got a promise request from this node, ignore it
+			return Accept{}, false
+		}
+	}
+
+	p.PromiseRequests = append(p.PromiseRequests, prm)
+
+	//If the proposer has gotten promise messages from a majority of acceptors
+	if len(p.PromiseRequests) >= p.NumNodes/2+1 {
+		//Check if the Promise messages have a enough "last voted values (vval)" to form a majority
+		if cstrVal, status := p.constrainedValue(p.PromiseRequests); status == true { //re-name these variables, bad names
+			//If yes, set the constrainedValue with the majority values from the acceptors
+			p.ConstrainedValue = cstrVal
+			return Accept{From: p.ID, Rnd: p.crnd, Val: p.ConstrainedValue}, true
+		}
+		//If there is no majority values out there, use my clientValue (Due to the test, set a dummy value first)
+		//p.clientValue = Value("defaultValue")
+		return Accept{From: p.ID, Rnd: p.crnd, Val: p.clientValue}, true
+	}
+	return Accept{}, false
 }
 
 // Internal: increaseCrnd increases proposer p's crnd field by the total number
 // of Paxos nodes.
 func (p *Proposer) increaseCrnd() {
 	//TODO(student): Task 2 - algorithm implementation
+	p.crnd += Round(p.NumNodes)
+	return
 }
 
 //TODO(student): Add any other unexported methods needed.
+func (p *Proposer) constrainedValue(prmReqs []Promise) (val Value, output bool) {
+	rndValue := make(map[Round]Value)
+	//Count every value in slice
+	for _, prmReq := range prmReqs {
+		if prmReq.Vval == ZeroValue {
+			continue
+		}
+		rndValue[prmReq.Vrnd] = prmReq.Vval
+	}
+	rndIndex := NoRound
+	for rnd := range rndValue {
+		if rnd > rndIndex {
+			rndIndex = rnd
+		}
+		return rndValue[rndIndex], true
+	}
+	return "", false
+}
+
+func (p *Proposer) clientHandler(cVal Value) (prp Prepare, output bool) {
+	leaderNode := p.LeaderDetector.Leader()
+	if leaderNode != p.ID {
+		return Prepare{}, false
+	}
+	p.clientValue = cVal
+	p.increaseCrnd()
+	return Prepare{From: p.ID, Crnd: p.crnd}, true
+}

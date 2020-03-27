@@ -7,6 +7,7 @@ import (
 	"net"
 	//"os"
 	"encoding/json"
+	"github.com/tirrrred/multipaxos/lab4/singlepaxos"
 	"strconv"
 	"strings"
 	"sync"
@@ -15,8 +16,11 @@ import (
 
 //NetConfig struct has network information to be used for configuration of network. How you are in the network (node id) and how is every one else in the network
 type NetConfig struct {
-	Myself int
-	Nodes  []Node
+	Myself    int
+	Nodes     []Node
+	Proposers []int
+	Acceptors []int
+	Learners  []int
 }
 
 //Node struct has node spesific fields like node id, node IP and node server port
@@ -30,19 +34,26 @@ type Node struct {
 
 //Network struct with spesific network details like network nodes and TCP connections to network nodes
 type Network struct {
-	Myself      Node
-	Nodes       []Node
-	Connections map[int]*net.TCPConn
-	ReceiveChan chan Message
-	SendChan    chan Message
+	Myself         Node
+	Nodes          []Node
+	Connections    map[int]*net.TCPConn
+	ReceiveChan    chan Message
+	SendChan       chan Message
+	ClientConnChan chan *net.TCPConn
 }
 
 //Message struct
 type Message struct {
-	To      int //Node ID
-	From    int // Node ID
-	Msg     string
-	Request bool // true -> request, false -> reply
+	Type    string //Type of Message: Heartbeat, Prepare, Promise, Accept, Learn, Value
+	To      int    //Node ID
+	From    int    //Node ID
+	Msg     string //Client message
+	Request bool   //true -> request, false -> reply
+	Promise singlepaxos.Promise
+	Accept  singlepaxos.Accept
+	Prepare singlepaxos.Prepare
+	Learn   singlepaxos.Learn
+	Value   singlepaxos.Value
 }
 
 var mutex = &sync.Mutex{}
@@ -51,11 +62,13 @@ var mutex = &sync.Mutex{}
 func InitNetwork(nodes []Node, myself int) (network Network, err error) {
 	rC := make(chan Message, 16)
 	sC := make(chan Message, 16)
+	ccC := make(chan *net.TCPConn, 16)
 	network = Network{
-		Nodes:       []Node{},
-		Connections: map[int]*net.TCPConn{},
-		ReceiveChan: rC,
-		SendChan:    sC,
+		Nodes:          []Node{},
+		Connections:    map[int]*net.TCPConn{},
+		ReceiveChan:    rC,
+		SendChan:       sC,
+		ClientConnChan: ccC,
 	}
 
 	for _, node := range nodes {
@@ -79,7 +92,7 @@ func InitNetwork(nodes []Node, myself int) (network Network, err error) {
 	return network, err
 }
 
-//EstablishNetwork starts server, Init connections to nodes
+//EstablishNetwork starts server, Init connections to nodes // NOT USED - REMOVE!
 func (n *Network) EstablishNetwork() (err error) {
 	err = n.InitConns()
 	if err != nil {
@@ -136,11 +149,15 @@ func (n *Network) StartServer() (err error) {
 			RemoteIP := RemoteIPPort[0]
 			//Add remote connection to n.Connection with node.ID as key and TCPconn as value
 			for _, node := range n.Nodes {
-				if node.IP == RemoteIP {
+				if node.IP == RemoteIP { //This isn't bulletproof, was there can be several host behind one IP (e.g NATing). Can use Socket Address instead (IP:Port)?
 					mutex.Lock()
 					n.Connections[node.ID] = TCPconn
 					mutex.Unlock()
 					fmt.Printf("AcceptTCP from node %v\n", TCPconn.RemoteAddr())
+				}
+				if node.IP != RemoteIP {
+					//Not a node in cluster/network -> assmue it is a client
+					n.ClientConnChan <- TCPconn
 				}
 			}
 			//Handle connections
@@ -217,4 +234,15 @@ func (n *Network) findRemoteAddr(TCPconn *net.TCPConn) int {
 		}
 	}
 	return -1
+}
+
+//SendMsgTo message to a set of destination hosts, based on node ID
+func (n *Network) SendMsgTo(msg Message, dst []int) {
+	for _, host := range dst {
+		msg.To = host
+		err := n.SendMessage(msg)
+		if err != nil {
+			log.Print(err)
+		}
+	}
 }

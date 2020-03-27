@@ -7,6 +7,15 @@ package singlepaxos
 type Acceptor struct {
 	//TODO(student): Task 2 and 3 - algorithm and distributed implementation
 	// Add needed fields
+	ID             int
+	HighestRound   Round //Highest Round Seen
+	VotedRound     Round //Round in which a Value was Last Accepted
+	VotedValue     Value //Value Last Accepted
+	PromiseOutChan chan<- Promise
+	LearnOutChan   chan<- Learn
+	stopChan       chan int
+	prepareChan    chan Prepare
+	acceptChan     chan Accept
 }
 
 // NewAcceptor returns a new single-decree Paxos acceptor.
@@ -19,7 +28,21 @@ type Acceptor struct {
 // learnOut: A send only channel used to send learns to other nodes.
 func NewAcceptor(id int, promiseOut chan<- Promise, learnOut chan<- Learn) *Acceptor {
 	//TODO(student): Task 2 and 3 - algorithm and distributed implementation
-	return &Acceptor{}
+	//Set of Proposers
+	//Proposers := []NodeIDs
+	//Set of Learners
+	//Learners := []NodeIDs
+	return &Acceptor{
+		ID:             id,
+		HighestRound:   NoRound,
+		VotedRound:     NoRound,
+		VotedValue:     ZeroValue,
+		PromiseOutChan: promiseOut,
+		LearnOutChan:   learnOut,
+		stopChan:       make(chan int),
+		prepareChan:    make(chan Prepare),
+		acceptChan:     make(chan Accept),
+	}
 }
 
 // Start starts a's main run loop as a separate goroutine. The main run loop
@@ -28,6 +51,18 @@ func (a *Acceptor) Start() {
 	go func() {
 		for {
 			//TODO(student): Task 3 - distributed implementation
+			select {
+			case prpMsg := <-a.prepareChan: //TODO: Create a channel to recvie pepare messages from other nodes
+				if prmMsg, sendMsg := a.handlePrepare(prpMsg); sendMsg == true {
+					a.PromiseOutChan <- prmMsg
+				}
+			case accMsg := <-a.acceptChan: //TODO: Create a channel to receive accept messages from other nodes
+				if lrnMsg, sendMsg := a.handleAccept(accMsg); sendMsg == true {
+					a.LearnOutChan <- lrnMsg
+				}
+			case <-a.stopChan:
+				break
+			}
 		}
 	}()
 }
@@ -35,16 +70,19 @@ func (a *Acceptor) Start() {
 // Stop stops a's main run loop.
 func (a *Acceptor) Stop() {
 	//TODO(student): Task 3 - distributed implementation
+	a.stopChan <- 0
 }
 
 // DeliverPrepare delivers prepare prp to acceptor a.
 func (a *Acceptor) DeliverPrepare(prp Prepare) {
 	//TODO(student): Task 3 - distributed implementation
+	a.prepareChan <- prp
 }
 
 // DeliverAccept delivers accept acc to acceptor a.
 func (a *Acceptor) DeliverAccept(acc Accept) {
 	//TODO(student): Task 3 - distributed implementation
+	a.acceptChan <- acc
 }
 
 // Internal: handlePrepare processes prepare prp according to the single-decree
@@ -54,7 +92,12 @@ func (a *Acceptor) DeliverAccept(acc Accept) {
 // struct.
 func (a *Acceptor) handlePrepare(prp Prepare) (prm Promise, output bool) {
 	//TODO(student): Task 2 - algorithm implementation
-	return Promise{To: -1, From: -1, Vrnd: -2, Vval: "FooBar"}, true
+	if prp.Crnd > a.HighestRound {
+		a.HighestRound = prp.Crnd
+		return Promise{To: prp.From, From: a.ID, Rnd: a.HighestRound, Vrnd: a.VotedRound, Vval: a.VotedValue}, true //promise(rnd,vrnd,vval)
+	}
+	return Promise{}, false
+
 }
 
 // Internal: handleAccept processes accept acc according to the single-decree
@@ -63,7 +106,14 @@ func (a *Acceptor) handlePrepare(prp Prepare) (prm Promise, output bool) {
 // handleAccept returns false as output, then lrn will be a zero-valued struct.
 func (a *Acceptor) handleAccept(acc Accept) (lrn Learn, output bool) {
 	//TODO(student): Task 2 - algorithm implementation
-	return Learn{From: -1, Rnd: -2, Val: "FooBar"}, true
+
+	if acc.Rnd >= a.HighestRound && acc.Rnd != a.VotedRound { //on <ACCEPT, n, v> with n >= rnd ^ n != vrnd from proposer c
+		a.HighestRound = acc.Rnd
+		a.VotedRound = acc.Rnd
+		a.VotedValue = acc.Val
+		return Learn{From: a.ID, Rnd: a.VotedRound, Val: a.VotedValue}, true //learn(rnd,vval)
+	}
+	return Learn{}, false
 }
 
 //TODO(student): Add any other unexported methods needed.
