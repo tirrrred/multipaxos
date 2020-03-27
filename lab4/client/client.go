@@ -51,7 +51,7 @@ func main() {
 	//Clients send command loop
 	go func() {
 		for {
-			fmt.Print("Enter command: ")
+			fmt.Println("Enter command: ")
 			var input string
 			fmt.Scanln(&input)
 			msg := network.Message{
@@ -69,10 +69,10 @@ func main() {
 			if receiveMsg.Type != "Value" {
 				continue
 			}
-			fmt.Println("Client: Received value: ", receiveMsg.Value)
+			fmt.Println("\nClient: Received value: ", receiveMsg.Value)
 		case sendMsg := <-SendChan:
 			sendMessage(sendMsg, conn2props)
-			fmt.Println("Client: Sends value: ", sendMsg.Value)
+			fmt.Println("\nClient: Sends value: ", sendMsg.Value)
 		}
 	}
 }

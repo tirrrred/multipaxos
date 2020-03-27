@@ -164,22 +164,22 @@ func main() {
 					From:    rMsg.From,
 					Request: rMsg.Request,
 				}
-				fmt.Printf("Main: (FD) %d got heartbeat from %d\n", appnet.Myself.ID, hb.From)
+				//fmt.Printf("Main: (FD) %d got heartbeat from %d\n", appnet.Myself.ID, hb.From)
 				fd.DeliverHeartbeat(hb) //Deliver hearbeat to fd
 			case rMsg.Type == "Prepare":
-				fmt.Printf("Main: (Acceptor) %d got prepare from %d\n", appnet.Myself.ID, rMsg.From)
+				fmt.Printf("Main: (Acceptor) %d got prepare from %d: %v\n", appnet.Myself.ID, rMsg.From, rMsg.Prepare)
 				acceptor.DeliverPrepare(rMsg.Prepare)
 			case rMsg.Type == "Promise":
-				fmt.Printf("Main: (Proposer) %d got promise from %d\n", appnet.Myself.ID, rMsg.From)
+				fmt.Printf("Main: (Proposer) %d got promise from %d: %v\n", appnet.Myself.ID, rMsg.From, rMsg.Promise)
 				proposer.DeliverPromise(rMsg.Promise)
 			case rMsg.Type == "Accept":
-				fmt.Printf("Main: (Acceptor) %d got accept from %d\n", appnet.Myself.ID, rMsg.From)
+				fmt.Printf("Main: (Acceptor) %d got accept from %d: %v\n", appnet.Myself.ID, rMsg.From, rMsg.Accept)
 				acceptor.DeliverAccept(rMsg.Accept)
 			case rMsg.Type == "Learn":
-				fmt.Printf("Main: (Learner) %d got learn from %d\n", appnet.Myself.ID, rMsg.From)
+				fmt.Printf("Main: (Learner) %d got learn from %d: %v\n", appnet.Myself.ID, rMsg.From, rMsg.Learn)
 				learner.DeliverLearn(rMsg.Learn)
 			case rMsg.Type == "Value":
-				fmt.Printf("Main: (Clienthandler) %d got value from %d\n", appnet.Myself.ID, rMsg.From)
+				fmt.Printf("Main: (Clienthandler) %d got value from %d: %v\n", appnet.Myself.ID, rMsg.From, rMsg.Value)
 				clihandler.DeliverValue(rMsg.Value)
 			}
 		}
