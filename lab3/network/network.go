@@ -114,7 +114,7 @@ func (n *Network) InitConns() (err error) {
 		TCPconn, err := net.DialTCP("tcp", nil, node.TCPaddr) //func(network string, laddr *net.TCPAddr, raddr *net.TCPAddr) (*net.TCPConn, error)
 		if err != nil {
 			log.Print(err)
-			return err
+			continue
 		} else {
 			n.Connections[node.ID] = TCPconn
 			fmt.Printf("DialTCP to node %v\n", node.TCPaddr)
@@ -148,17 +148,20 @@ func (n *Network) StartServer() (err error) {
 			RemoteIPPort := strings.Split(RemoteSocket.String(), ":")
 			RemoteIP := RemoteIPPort[0]
 			//Add remote connection to n.Connection with node.ID as key and TCPconn as value
+			clientNode := true
+			//loop to match Connection IP woth Node IP in network. Adds the TCP connection to the correct Node ID in map "Connections"
 			for _, node := range n.Nodes {
 				if node.IP == RemoteIP { //This isn't bulletproof, was there can be several host behind one IP (e.g NATing). Can use Socket Address instead (IP:Port)?
 					mutex.Lock()
 					n.Connections[node.ID] = TCPconn
 					mutex.Unlock()
 					fmt.Printf("AcceptTCP from node %v\n", TCPconn.RemoteAddr())
+					//Found matching IP address - This TCP connection is from a network node. Sets the clientNode to false
+					clientNode = false
 				}
-				if node.IP != RemoteIP {
-					//Not a node in cluster/network -> assmue it is a client
-					n.ClientConnChan <- TCPconn
-				}
+			}
+			if clientNode {
+				n.ClientConnChan <- TCPconn
 			}
 			//Handle connections
 			go n.ListenConns(TCPconn)
