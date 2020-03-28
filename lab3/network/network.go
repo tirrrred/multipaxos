@@ -7,6 +7,7 @@ import (
 	"net"
 	//"os"
 	"encoding/json"
+	"errors"
 	"github.com/tirrrred/multipaxos/lab4/singlepaxos"
 	"strconv"
 	"strings"
@@ -222,8 +223,8 @@ func (n *Network) SendMessage(message Message) (err error) {
 	}
 	remoteConn := n.Connections[message.To]
 	if remoteConn == nil {
-		fmt.Printf("Connection to node %d isnt present in n.Connections", message.To)
-		return nil
+		//fmt.Printf("Connection to node %d isnt present in n.Connections\n", message.To)
+		return fmt.Errorf("Connection to node %d isnt present in n.Connections", message.To)
 	}
 	//fmt.Printf("\nReady to send message over conn %v: %v\n", n.Connections[message.To], message)
 	_, err = n.Connections[message.To].Write(messageByte)
