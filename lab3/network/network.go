@@ -261,9 +261,9 @@ func (n *Network) SendMsgTo(msg Message, dst []int) {
 //printConnTable is intended as netstat is in windows - prints all connections
 func (n *Network) printConnTable() {
 	fmt.Printf("**Connection table for node: %d**\n\n", n.Myself.ID)
-	fmt.Printf("Node ID \t Local Address \t Remote Address\n")
+	fmt.Printf("Node ID \t Local Address \t\t Remote Address\n")
 	for nodeID, TCPconn := range n.Connections {
-		fmt.Printf("%d \t %v \t %v\n", nodeID, TCPconn.LocalAddr(), TCPconn.RemoteAddr())
+		fmt.Printf("Node %d \t %v \t %v\n", nodeID, TCPconn.LocalAddr(), TCPconn.RemoteAddr())
 	}
 	for i, TCPconn := range n.ClientConns {
 		fmt.Printf("Client%d \t %v \t %v\n", i, TCPconn.LocalAddr(), TCPconn.RemoteAddr())
