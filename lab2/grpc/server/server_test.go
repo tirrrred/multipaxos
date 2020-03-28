@@ -1,13 +1,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strconv"
 	"strings"
 	"testing"
-
-	"golang.org/x/net/context"
 
 	pb "dat520/lab2/grpc/proto"
 )

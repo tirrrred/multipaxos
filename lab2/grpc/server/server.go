@@ -4,12 +4,12 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"net"
 	"os"
 
-	"golang.org/x/net/context"
 	"google.golang.org/grpc"
 
 	pb "dat520/lab2/grpc/proto"
