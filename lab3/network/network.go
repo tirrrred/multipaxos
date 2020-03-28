@@ -37,6 +37,7 @@ type Network struct {
 	Myself         Node
 	Nodes          []Node
 	Connections    map[int]*net.TCPConn
+	ClientConns    []*net.TCPConn
 	ReceiveChan    chan Message
 	SendChan       chan Message
 	ClientConnChan chan *net.TCPConn
@@ -66,6 +67,7 @@ func InitNetwork(nodes []Node, myself int) (network Network, err error) {
 	network = Network{
 		Nodes:          []Node{},
 		Connections:    map[int]*net.TCPConn{},
+		ClientConns:    []*net.TCPConn{},
 		ReceiveChan:    rC,
 		SendChan:       sC,
 		ClientConnChan: ccC,
@@ -161,6 +163,7 @@ func (n *Network) StartServer() (err error) {
 				}
 			}
 			if clientNode {
+				n.ClientConns = append(n.ClientConns, TCPconn)
 				n.ClientConnChan <- TCPconn
 			}
 			//Handle connections
@@ -261,6 +264,9 @@ func (n *Network) printConnTable() {
 	fmt.Printf("Node ID \t Local Address \t Remote Address\n")
 	for nodeID, TCPconn := range n.Connections {
 		fmt.Printf("%d \t %v \t %v\n", nodeID, TCPconn.LocalAddr(), TCPconn.RemoteAddr())
+	}
+	for i, TCPconn := range n.ClientConns {
+		fmt.Printf("Client%d \t %v \t %v\n", i, TCPconn.LocalAddr(), TCPconn.RemoteAddr())
 	}
 	fmt.Printf("**Connection table for node: %d**\n\n", n.Myself.ID)
 
