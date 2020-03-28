@@ -126,6 +126,7 @@ func main() {
 				From:    prp.From,
 				Prepare: prp,
 			}
+			fmt.Printf("Main: (Proposer) %d sent prepare to acceptors %v: %v\n", appnet.Myself.ID, netconf.Acceptors, prp)
 			appnet.SendMsgTo(prpMsg, netconf.Acceptors)
 		//Send promise from acceptor to proposer
 		case prm := <-promiseOutChan:
@@ -135,6 +136,7 @@ func main() {
 				From:    prm.From,
 				Promise: prm,
 			}
+			fmt.Printf("Main: (Acceptor) %d sent promise to proposer %d: %v\n", appnet.Myself.ID, prm.To, prm)
 			appnet.SendMessage(prmMsg)
 		//Send accept from proposer to acceptors
 		case acc := <-acceptOutChan:
@@ -143,6 +145,7 @@ func main() {
 				From:   acc.From,
 				Accept: acc,
 			}
+			fmt.Printf("Main: (Proposer) %d sent accept to acceptors %v: %v\n", appnet.Myself.ID, netconf.Acceptors, acc)
 			appnet.SendMsgTo(accMsg, netconf.Acceptors)
 		//Send learn from acceptor to learners
 		case lrn := <-learnOutChan:
@@ -151,6 +154,7 @@ func main() {
 				From:  lrn.From,
 				Learn: lrn,
 			}
+			fmt.Printf("Main: (Acceptor) %d sent learn to learners %v: %v\n", appnet.Myself.ID, netconf.Learners, lrn)
 			appnet.SendMsgTo(lrnMsg, netconf.Learners)
 		//Send value from learner to client(handler)
 		case val := <-valueOutChan:
