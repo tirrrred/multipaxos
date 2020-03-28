@@ -222,8 +222,8 @@ func (n *Network) SendMessage(message Message) (err error) {
 	}
 	remoteConn := n.Connections[message.To]
 	if remoteConn == nil {
-		//fmt.Printf("Connection to node %d isnt present in n.Connections", message.To)
-		return err
+		fmt.Printf("Connection to node %d isnt present in n.Connections", message.To)
+		return nil
 	}
 	//fmt.Printf("\nReady to send message over conn %v: %v\n", n.Connections[message.To], message)
 	_, err = n.Connections[message.To].Write(messageByte)
@@ -263,7 +263,7 @@ func (n *Network) printConnTable() {
 	fmt.Printf("**Connection table for node: %d**\n\n", n.Myself.ID)
 	fmt.Printf("Node ID \t Local Address \t\t Remote Address\n")
 	for nodeID, TCPconn := range n.Connections {
-		fmt.Printf("Node %d \t %v \t %v\n", nodeID, TCPconn.LocalAddr(), TCPconn.RemoteAddr())
+		fmt.Printf("Node   %d \t %v \t %v\n", nodeID, TCPconn.LocalAddr(), TCPconn.RemoteAddr())
 	}
 	for i, TCPconn := range n.ClientConns {
 		fmt.Printf("Client%d \t %v \t %v\n", i, TCPconn.LocalAddr(), TCPconn.RemoteAddr())
