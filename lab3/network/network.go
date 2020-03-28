@@ -176,7 +176,7 @@ func (n *Network) StartServer() (err error) {
 			//fmt.Println(message)
 			err := n.SendMessage(message)
 			if err != nil {
-				fmt.Println("Error: Sending message to network node failed")
+				fmt.Println(err)
 			}
 		}
 	}()
@@ -193,9 +193,6 @@ func (n *Network) ListenConns(TCPconn *net.TCPConn) (err error) {
 		len, _ := TCPconn.Read(buffer[0:])
 		message := new(Message)
 		err = json.Unmarshal(buffer[0:len], &message)
-		if nodeID == -1 { //Assumes nodeID -1 is a client
-			message.Type = "Value"
-		}
 		//fmt.Printf("\nReceived message over conn %v: %v\n", TCPconn, *message)
 		n.ReceiveChan <- *message
 	}
@@ -209,8 +206,7 @@ func (n *Network) SendMessage(message Message) (err error) {
 	syncMutex.Lock()
 	defer syncMutex.Unlock()
 
-	//Can this if statement be removed?
-	if message.To == n.Myself.ID { //Duplicates accept messages
+	if message.To == n.Myself.ID {
 		n.ReceiveChan <- message
 		return nil
 	}
@@ -263,12 +259,12 @@ func (n *Network) printConnTable() {
 	fmt.Printf("**Connection table for node: %d**\n\n", n.Myself.ID)
 	fmt.Printf("Node ID \t Local Address \t\t Remote Address\n")
 	for nodeID, TCPconn := range n.Connections {
-		fmt.Printf("Node   %d \t %v \t %v\n", nodeID, TCPconn.LocalAddr(), TCPconn.RemoteAddr())
+		fmt.Printf("Node %d   \t %v \t %v\n", nodeID, TCPconn.LocalAddr(), TCPconn.RemoteAddr())
 	}
 	for i, TCPconn := range n.ClientConns {
-		fmt.Printf("Client%d \t %v \t %v\n", i, TCPconn.LocalAddr(), TCPconn.RemoteAddr())
+		fmt.Printf("Client %d \t %v \t %v\n", i, TCPconn.LocalAddr(), TCPconn.RemoteAddr())
 	}
-	fmt.Printf("**Connection table for node: %d**\n\n", n.Myself.ID)
+	fmt.Printf("\n**Connection table for node: %d**\n", n.Myself.ID)
 
 	//map[int]*net.TCPConn
 }
