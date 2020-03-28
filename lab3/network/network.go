@@ -7,7 +7,6 @@ import (
 	"net"
 	//"os"
 	"encoding/json"
-	"errors"
 	"github.com/tirrrred/multipaxos/lab4/singlepaxos"
 	"strconv"
 	"strings"
