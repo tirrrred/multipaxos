@@ -185,6 +185,7 @@ func (n *Network) ListenConns(TCPconn *net.TCPConn) (err error) {
 	buffer := make([]byte, 1024, 1024)
 	nodeID := n.findRemoteAddr(TCPconn)
 	fmt.Println("At HandleConns func now. Connection from: ", nodeID)
+	n.printConnTable()
 	for {
 		len, _ := TCPconn.Read(buffer[0:])
 		message := new(Message)
@@ -205,7 +206,8 @@ func (n *Network) SendMessage(message Message) (err error) {
 	syncMutex.Lock()
 	defer syncMutex.Unlock()
 
-	if message.To == n.Myself.ID {
+	//Can this if statement be removed?
+	if message.To == n.Myself.ID { //Duplicates accept messages
 		n.ReceiveChan <- message
 		return nil
 	}
@@ -251,4 +253,16 @@ func (n *Network) SendMsgTo(msg Message, dst []int) {
 			log.Print(err)
 		}
 	}
+}
+
+//printConnTable is intended as netstat is in windows - prints all connections
+func (n *Network) printConnTable() {
+	fmt.Printf("**Connection table for node: %d**\n\n", n.Myself.ID)
+	fmt.Printf("Node ID \t Local Address \t Remote Address\n")
+	for nodeID, TCPconn := range n.Connections {
+		fmt.Printf("%d \t %v \t %v\n", nodeID, TCPconn.LocalAddr(), TCPconn.RemoteAddr())
+	}
+	fmt.Printf("**Connection table for node: %d**\n\n", n.Myself.ID)
+
+	//map[int]*net.TCPConn
 }
