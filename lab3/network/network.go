@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"syscall"
 	//"time"
 )
 
@@ -227,6 +228,9 @@ func (n *Network) SendMessage(message Message) (err error) {
 	}
 	_, err = n.Connections[message.To].Write(messageByte)
 	if err != nil {
+		if err == syscall.EPIPE {
+			log.Print(err)
+		}
 		//log.Print(err)
 		return err
 	}
