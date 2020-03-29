@@ -14,6 +14,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/signal"
 	"time"
 )
 
@@ -90,6 +91,10 @@ func main() {
 	cliConnChan := appnet.ClientConnChan
 	clihandler := clienthandler.NewClientHandler(appnet.Myself.ID, proposer, cliConnChan)
 	clihandler.Start()
+
+	//done channel to receive os signal (like ctrl+c). Should close TCP connections correctly
+	done := make(chan os.Signal)
+	signal.Notify(done, os.Interrupt)
 
 	for {
 		select {
@@ -185,6 +190,16 @@ func main() {
 			case rMsg.Type == "Value":
 				fmt.Printf("Main: (Clienthandler) %d got value from %d: %v\n", appnet.Myself.ID, rMsg.From, rMsg.Value)
 				clihandler.DeliverValue(rMsg.Value)
+			}
+		case <-done:
+			proposer.Stop()
+			acceptor.Stop()
+			learner.Stop()
+			for _, tcpConn := range appnet.Connections {
+				appnet.CloseConn(tcpConn)
+			}
+			for _, tcpConn := range appnet.ClientConns {
+				appnet.CloseConn(tcpConn)
 			}
 		}
 
