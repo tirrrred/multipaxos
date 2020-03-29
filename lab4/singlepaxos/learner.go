@@ -104,8 +104,10 @@ func (l *Learner) handleLearn(learn Learn) (val Value, output bool) {
 		//Check if any value gives a majority
 		if verifiedValue, majorityFound := l.majorityValue(l.LrnVals); majorityFound == true {
 			fmt.Printf("Learner: Consensus reached on value: %v\n", verifiedValue)
+			l.ConsensusValue = verifiedValue
 			return verifiedValue, true
 		}
+		return l.ConsensusValue, true
 	}
 
 	//l.LrnVals = append(l.LrnVals, LearnedValues{From: learn.From, Round: learn.Rnd, Value: learn.Val})

@@ -187,8 +187,8 @@ func (n *Network) StartServer() (err error) {
 func (n *Network) ListenConns(TCPconn *net.TCPConn) (err error) {
 	defer n.CloseConn(TCPconn)
 	buffer := make([]byte, 1024, 1024)
-	nodeID := n.findRemoteAddr(TCPconn)
-	fmt.Println("At HandleConns func now. Connection from: ", nodeID)
+	//nodeID := n.findRemoteAddr(TCPconn)
+	//fmt.Println("At HandleConns func now. Connection from: ", nodeID)
 	n.printConnTable()
 	for {
 		len, _ := TCPconn.Read(buffer[0:])

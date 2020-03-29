@@ -51,7 +51,7 @@ func main() {
 	//Clients send command loop
 	go func() {
 		for {
-			fmt.Println("Enter command: ")
+			fmt.Println("\nEnter command: ")
 			var input string
 			fmt.Scanln(&input)
 			msg := network.Message{
@@ -139,6 +139,7 @@ func listenOnConn(TCPconn *net.TCPConn, rChan chan network.Message) {
 		err := json.Unmarshal(buffer[0:len], &message)
 		if err != nil {
 			log.Print(err)
+			fmt.Println(buffer[0:len])
 			return
 		}
 		rChan <- *message
