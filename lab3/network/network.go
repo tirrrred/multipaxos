@@ -176,7 +176,7 @@ func (n *Network) StartServer() (err error) {
 			//fmt.Println(message)
 			err := n.SendMessage(message)
 			if err != nil {
-				fmt.Println(err)
+				fmt.Println(err) //Spams error message when connection not established - how to fix?
 			}
 		}
 	}()
@@ -218,10 +218,10 @@ func (n *Network) SendMessage(message Message) (err error) {
 		return err
 	}
 	remoteConn := n.Connections[message.To]
-	//if remoteConn == nil {
-	//fmt.Printf("Connection to node %d isnt present in n.Connections\n", message.To)
-	//return fmt.Errorf("Connection to node %d isnt present in n.Connections", message.To)
-	//}
+	if remoteConn == nil {
+		//fmt.Printf("Connection to node %d isnt present in n.Connections\n", message.To)
+		return nil
+	}
 	if message.Type != "Heartbeat" {
 		fmt.Printf("SendMessage: From: %v (%d) To: %v (%d) Message: %v\n", remoteConn.LocalAddr(), n.Myself.ID, remoteConn.RemoteAddr(), message.To, message)
 	}
@@ -254,7 +254,7 @@ func (n *Network) SendMsgTo(msg Message, dst []int) {
 		msg.To = host
 		err := n.SendMessage(msg)
 		if err != nil {
-			log.Print(err)
+			log.Print(err) //Spams error message when connection not established - how to fix?
 		}
 	}
 }
