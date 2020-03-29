@@ -185,6 +185,7 @@ func (n *Network) StartServer() (err error) {
 
 //ListenConns handle TCP connections
 func (n *Network) ListenConns(TCPconn *net.TCPConn) (err error) {
+	defer n.closeConn(TCPconn)
 	buffer := make([]byte, 1024, 1024)
 	nodeID := n.findRemoteAddr(TCPconn)
 	fmt.Println("At HandleConns func now. Connection from: ", nodeID)
@@ -269,4 +270,24 @@ func (n *Network) printConnTable() {
 	fmt.Printf("\n**Connection table for node: %d**\n", n.Myself.ID)
 
 	//map[int]*net.TCPConn
+}
+
+func (n *Network) closeConn(c *net.TCPConn) error {
+	//Node connection or client connection?
+	c.Close()
+	fmt.Println("Network: Closing connection from", c.RemoteAddr())
+	nodeID := n.findRemoteAddr(c)
+	if nodeID == -1 { //Client connection
+		for i, cC := range n.ClientConns {
+			if cC.RemoteAddr() == c.RemoteAddr() {
+				n.ClientConns = append(n.ClientConns[:i], n.ClientConns[i+1:]...)
+			}
+		}
+	}
+	fmt.Println("Network: Closing connection from", c.RemoteAddr())
+	mutex.Lock()
+	delete(n.Connections, nodeID)
+	mutex.Unlock()
+	n.printConnTable()
+	return nil
 }
