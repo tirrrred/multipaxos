@@ -228,10 +228,9 @@ func (n *Network) SendMessage(message Message) (err error) {
 	}
 	_, err = n.Connections[message.To].Write(messageByte)
 	if err != nil {
-		if err == syscall.EPIPE {
-			log.Print(err)
-		}
-		//log.Print(err)
+		log.Print(err)
+		//Assumes the connection is broken (write: broken pipe)
+		n.CloseConn(n.Connections[message.To])
 		return err
 	}
 	return err
