@@ -201,6 +201,7 @@ func main() {
 			for _, tcpConn := range appnet.ClientConns {
 				appnet.CloseConn(tcpConn)
 			}
+			os.Exit(0)
 		}
 
 	}
