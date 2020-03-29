@@ -59,21 +59,21 @@ func main() {
 	//Implement PAXOS roles:
 	if iAMa(netconf.Proposers, appnet.Myself.ID) { //If I'am a proposer
 		fmt.Println("I am a PROPOSER!")
-		prepareOutChan = make(chan singlepaxos.Prepare)
-		acceptOutChan = make(chan singlepaxos.Accept)
+		prepareOutChan = make(chan singlepaxos.Prepare, 16)
+		acceptOutChan = make(chan singlepaxos.Accept, 16)
 		proposer = singlepaxos.NewProposer(appnet.Myself.ID, len(netconf.Acceptors), ld, prepareOutChan, acceptOutChan) //NewProposer func(id int, nrOfNodes int, ld detector.LeaderDetector, prepareOut chan<- Prepare, acceptOut chan<- Accept) *Proposer
 		proposer.Start()
 	}
 	if iAMa(netconf.Acceptors, appnet.Myself.ID) { //If I'am a acceptor
 		fmt.Println("I am a ACCEPTOR!")
-		promiseOutChan = make(chan singlepaxos.Promise)
-		learnOutChan = make(chan singlepaxos.Learn)
+		promiseOutChan = make(chan singlepaxos.Promise, 16)
+		learnOutChan = make(chan singlepaxos.Learn, 16)
 		acceptor = singlepaxos.NewAcceptor(appnet.Myself.ID, promiseOutChan, learnOutChan) //NewAcceptor func(id int, promiseOut chan<- Promise, learnOut chan<- Learn) *Acceptor
 		acceptor.Start()
 	}
 	if iAMa(netconf.Learners, appnet.Myself.ID) { //If I'am a learner
 		fmt.Println("I am a LEARNER!")
-		valueOutChan = make(chan singlepaxos.Value)
+		valueOutChan = make(chan singlepaxos.Value, 16)
 		learner = singlepaxos.NewLearner(appnet.Myself.ID, len(netconf.Acceptors), valueOutChan) //NewLearner func(id int, nrOfNodes int, valueOut chan<- Value) *Learner
 		learner.Start()
 	}
