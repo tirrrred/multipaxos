@@ -219,9 +219,9 @@ func (n *Network) SendMessage(message Message) (err error) {
 	}
 	remoteConn := n.Connections[message.To]
 	//if remoteConn == nil {
-		//fmt.Printf("Connection to node %d isnt present in n.Connections\n", message.To)
-		//return fmt.Errorf("Connection to node %d isnt present in n.Connections", message.To)
-	}
+	//fmt.Printf("Connection to node %d isnt present in n.Connections\n", message.To)
+	//return fmt.Errorf("Connection to node %d isnt present in n.Connections", message.To)
+	//}
 	if message.Type != "Heartbeat" {
 		fmt.Printf("SendMessage: From: %v (%d) To: %v (%d) Message: %v\n", remoteConn.LocalAddr(), n.Myself.ID, remoteConn.RemoteAddr(), message.To, message)
 	}
