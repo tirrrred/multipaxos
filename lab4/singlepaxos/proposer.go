@@ -110,7 +110,7 @@ func (p *Proposer) handlePromise(prm Promise) (acc Accept, output bool) {
 	//cval = Constrained Consensus Value, i.e not freely choosen by the client/proposer.
 	//vrnd = Round in which a Value was Last Accepted
 	//vval = Value Last Accepted
-	fmt.Println("Promiser: handlePromise(prm)")
+	fmt.Println("Promiser: handlePromise(prm) Start")
 
 	if prm.Rnd > p.crnd {
 		p.crnd = prm.Rnd
@@ -122,27 +122,32 @@ func (p *Proposer) handlePromise(prm Promise) (acc Accept, output bool) {
 	}
 
 	//p.crnd = prm.rnd at this stage
-	for i, prmReq := range p.PromiseRequests {
-		if prmReq.From == prm.From { //If we already got a promise request from this node
-			if prmReq.Rnd < prm.Rnd { //Check if the new promise request has a bigger Rnd than the current (old) promise request
-				p.PromiseRequests[i] = prm //If yes, replace the old request with the new one
+	if len(p.PromiseRequests) > 0 {
+		for i, prmReq := range p.PromiseRequests {
+			if prmReq.From == prm.From { //If we already got a promise request from this node
+				if prmReq.Rnd < prm.Rnd { //Check if the new promise request has a bigger Rnd than the current (old) promise request
+					p.PromiseRequests[i] = prm //If yes, replace the old request with the new one
+				}
+			} else {
+				p.PromiseRequests = append(p.PromiseRequests, prm) //If we don't have a promise request from this node before, append it.
 			}
-		} else {
-			p.PromiseRequests = append(p.PromiseRequests, prm) //If we don't have a promise request from this node before, append it.
-		}
 
+		}
 	}
 
+	p.PromiseRequests = append(p.PromiseRequests, prm)
 	//If the proposer has gotten promise messages from a majority of acceptors
 	if len(p.PromiseRequests) >= p.NumNodes/2+1 {
 		//Check if the Promise messages have a enough "last voted values (vval)" to form a majority
 		if cstrVal, status := p.constrainedValue(p.PromiseRequests); status == true { //re-name these variables, bad names
 			//If yes, set the constrainedValue with the majority values from the acceptors
 			p.ConstrainedValue = cstrVal
+			fmt.Println("Promiser: handlePromise(prm) return constraintedValue, true")
 			return Accept{From: p.ID, Rnd: p.crnd, Val: p.ConstrainedValue}, true
 		}
 		//If there is no majority values out there, use my clientValue (Due to the test, set a dummy value first)
 		//p.clientValue = Value("defaultValue")
+		fmt.Println("Promiser: handlePromise(prm) return clientvalue, true")
 		return Accept{From: p.ID, Rnd: p.crnd, Val: p.clientValue}, true
 	}
 	return Accept{}, false
