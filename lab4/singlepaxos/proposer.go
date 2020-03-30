@@ -127,10 +127,10 @@ func (p *Proposer) handlePromise(prm Promise) (acc Accept, output bool) {
 			if prmReq.Rnd < prm.Rnd { //Check if the new promise request has a bigger Rnd than the current (old) promise request
 				p.PromiseRequests[i] = prm //If yes, replace the old request with the new one
 			}
-		} else if {
+		} else {
 			p.PromiseRequests = append(p.PromiseRequests, prm) //If we don't have a promise request from this node before, append it.
 		}
-		
+
 	}
 
 	//If the proposer has gotten promise messages from a majority of acceptors
