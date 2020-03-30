@@ -2,7 +2,10 @@
 
 package singlepaxos
 
-import "github.com/tirrrred/multipaxos/lab3/detector"
+import (
+	"fmt"
+	"github.com/tirrrred/multipaxos/lab3/detector"
+)
 
 // Proposer represents a proposer as defined by the single-decree Paxos
 // algorithm.
@@ -107,22 +110,28 @@ func (p *Proposer) handlePromise(prm Promise) (acc Accept, output bool) {
 	//cval = Constrained Consensus Value, i.e not freely choosen by the client/proposer.
 	//vrnd = Round in which a Value was Last Accepted
 	//vval = Value Last Accepted
+	fmt.Println("Promiser: handlePromise(prm)")
+
 	if prm.Rnd > p.crnd {
 		p.crnd = prm.Rnd
 		p.PromiseRequests = nil
-		p.PromiseRequests = append(p.PromiseRequests, prm)
-		return Accept{}, false
+		//p.PromiseRequests = append(p.PromiseRequests, prm)
+		//return Accept{}, false
 	} else if prm.Rnd < p.crnd || prm.Rnd == NoRound {
 		return Accept{}, false
 	}
 
-	for _, prmReq := range p.PromiseRequests {
-		if prmReq.From == prm.From { //If we already got a promise request from this node, ignore it
-			return Accept{}, false
+	//p.crnd = prm.rnd at this stage
+	for i, prmReq := range p.PromiseRequests {
+		if prmReq.From == prm.From { //If we already got a promise request from this node
+			if prmReq.Rnd < prm.Rnd { //Check if the new promise request has a bigger Rnd than the current (old) promise request
+				p.PromiseRequests[i] = prm //If yes, replace the old request with the new one
+			}
+		} else if {
+			p.PromiseRequests = append(p.PromiseRequests, prm) //If we don't have a promise request from this node before, append it.
 		}
+		
 	}
-
-	p.PromiseRequests = append(p.PromiseRequests, prm)
 
 	//If the proposer has gotten promise messages from a majority of acceptors
 	if len(p.PromiseRequests) >= p.NumNodes/2+1 {
