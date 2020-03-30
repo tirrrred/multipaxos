@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"github.com/tirrrred/multipaxos/lab3/network"
 	"github.com/tirrrred/multipaxos/lab4/singlepaxos"
+	"io"
 	"io/ioutil"
 	"log"
 	"net"
@@ -134,12 +135,18 @@ func listenOnConn(TCPconn *net.TCPConn, rChan chan network.Message) {
 	defer TCPconn.Close()
 	buffer := make([]byte, 1024, 1024)
 	for {
-		len, _ := TCPconn.Read(buffer[0:])
+		len, err := TCPconn.Read(buffer[0:])
+		if err != nil {
+			if err == io.EOF {
+				fmt.Println(string(buffer[:len]))
+			}
+			fmt.Println("Client: listenOnConn error: ", err)
+		}
 		message := new(network.Message)
-		err := json.Unmarshal(buffer[0:len], &message)
+		err = json.Unmarshal(buffer[0:len], &message)
 		if err != nil {
 			log.Print(err)
-			fmt.Println(buffer[0:len])
+			fmt.Println(string(buffer[0:len]))
 			return
 		}
 		rChan <- *message
@@ -155,7 +162,8 @@ func sendMessage(message network.Message, propConnMap map[int]*net.TCPConn) erro
 	}
 
 	for _, conn := range propConnMap {
-		_, err := conn.Write(messageByte)
+		bytes, err := conn.Write(messageByte)
+		fmt.Println("Client: Sends message of size (bytes): ", bytes)
 		if err != nil {
 			log.Print(err)
 			return err
