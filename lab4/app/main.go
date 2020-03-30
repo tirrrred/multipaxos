@@ -40,7 +40,7 @@ func main() {
 	ld := detector.NewMonLeaderDetector(netconf.Proposers) //*MonLeaderDetector
 
 	//create failure detector
-	hbSend := make(chan detector.Heartbeat, 16)
+	hbSend := make(chan detector.Heartbeat, 24)
 	fd := detector.NewEvtFailureDetector(appnet.Myself.ID, nodeIDs, ld, 2*time.Second, hbSend) //2 second timeout for failure detector - Increase/Decrease?
 
 	//subscribe to leader changes

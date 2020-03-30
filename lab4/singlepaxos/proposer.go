@@ -49,8 +49,8 @@ func NewProposer(id int, nrOfNodes int, ld detector.LeaderDetector, prepareOut c
 		LeaderDetector:   ld,
 		PrepareOutChan:   prepareOut,
 		AcceptOutChan:    acceptOut,
-		promiseChan:      make(chan Promise),
-		clientValueChan:  make(chan Value),
+		promiseChan:      make(chan Promise, 16),
+		clientValueChan:  make(chan Value, 16),
 		stopChan:         make(chan int),
 	}
 }
@@ -110,6 +110,7 @@ func (p *Proposer) handlePromise(prm Promise) (acc Accept, output bool) {
 	if prm.Rnd > p.crnd {
 		p.crnd = prm.Rnd
 		p.PromiseRequests = nil
+		p.PromiseRequests = append(p.PromiseRequests, prm)
 		return Accept{}, false
 	} else if prm.Rnd < p.crnd || prm.Rnd == NoRound {
 		return Accept{}, false
