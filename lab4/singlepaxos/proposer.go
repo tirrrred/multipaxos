@@ -112,7 +112,7 @@ func (p *Proposer) handlePromise(prm Promise) (acc Accept, output bool) {
 	//vval = Value Last Accepted
 	fmt.Println("Promiser: handlePromise(prm) Start")
 
-	if prm.Rnd >= p.crnd {
+	if prm.Rnd > p.crnd {
 		p.crnd = prm.Rnd
 		p.PromiseRequests = nil
 		//p.PromiseRequests = append(p.PromiseRequests, prm)
@@ -187,6 +187,6 @@ func (p *Proposer) clientHandler(cVal Value) (prp Prepare, output bool) {
 		return Prepare{}, false
 	}
 	p.clientValue = cVal
-	p.increaseCrnd()
+	defer p.increaseCrnd()
 	return Prepare{From: p.ID, Crnd: p.crnd}, true
 }

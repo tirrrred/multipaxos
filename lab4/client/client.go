@@ -140,7 +140,8 @@ func listenOnConn(TCPconn *net.TCPConn, rChan chan network.Message) {
 			if err == io.EOF {
 				fmt.Println(string(buffer[:len]))
 			}
-			fmt.Println("Client: listenOnConn error: ", err)
+			fmt.Print("Client: listenOnConn error: ", err)
+			fmt.Println("\tClosing TCP connection: ", TCPconn.RemoteAddr())
 			TCPconn.Close()
 		}
 		message := new(network.Message)
