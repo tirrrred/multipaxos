@@ -122,7 +122,7 @@ func connToProposers(props []int, nodes []network.Node, propConnMap map[int]*net
 				TCPconn, err := net.DialTCP("tcp", nil, rAddr) //func(network string, laddr *net.TCPAddr, raddr *net.TCPAddr) (*net.TCPConn, error)
 				if err != nil {
 					log.Print(err)
-					return nil, err
+					continue
 				}
 				propConnMap[prop] = TCPconn
 			}
