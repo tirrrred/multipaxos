@@ -121,7 +121,7 @@ func (p *Proposer) handlePromise(prm Promise) (acc Accept, output bool) {
 		return Accept{}, false
 	}
 
-	//p.crnd = prm.rnd at this stage
+	//p.crnd < prm.rnd at this stage?? UneccsaRY?
 	if len(p.PromiseRequests) > 0 {
 		for i, prmReq := range p.PromiseRequests {
 			if prmReq.From == prm.From { //If we already got a promise request from this node
