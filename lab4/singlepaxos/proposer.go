@@ -190,6 +190,6 @@ func (p *Proposer) clientHandler(cVal Value) (prp Prepare, output bool) {
 		return Prepare{}, false
 	}
 	p.clientValue = cVal
-	//p.increaseCrnd()
+	p.increaseCrnd()
 	return Prepare{From: p.ID, Crnd: p.crnd}, true
 }
