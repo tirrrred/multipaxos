@@ -66,10 +66,13 @@ func (ch *ClientHandler) Start() {
 					//Send learned value to client conns
 					messageByte, err := json.Marshal(lrnMsg) //func(v interface{}) ([]byte, error)
 					if err != nil {
+						fmt.Println("clientHandler: json.Marshal()")
 						log.Print(err)
+						continue
 					}
 					_, err = cConn.Write(messageByte)
 					if err != nil {
+						fmt.Println("clientHandler: cConn.Write()")
 						log.Print(err)
 					}
 				}
