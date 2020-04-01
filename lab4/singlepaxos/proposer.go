@@ -120,6 +120,14 @@ func (p *Proposer) handlePromise(prm Promise) (acc Accept, output bool) {
 		return Accept{}, false
 	}
 
+	//Test code - remeber to run prop_test.go
+	if len(p.PromiseRequests) > 0 {
+		if prm.Rnd > p.PromiseRequests[0].Rnd {
+			p.PromiseRequests = nil
+			p.PromiseRequests = append(p.PromiseRequests, prm)
+		}
+	}
+
 	for _, prmReq := range p.PromiseRequests {
 		if prmReq.From == prm.From { //If we already got a promise request from this node
 			fmt.Println("Already received promise from this node - reject! Node: ", prm.From)
