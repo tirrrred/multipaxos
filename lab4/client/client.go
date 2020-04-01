@@ -149,7 +149,7 @@ func listenOnConn(TCPconn *net.TCPConn, rChan chan network.Message) {
 		if err != nil {
 			log.Print(err)
 			fmt.Println(string(buffer[0:len]))
-			return
+			continue
 		}
 		rChan <- *message
 	}
