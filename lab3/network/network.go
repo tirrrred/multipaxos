@@ -220,7 +220,7 @@ func (n *Network) SendMessage(message Message) (err error) {
 	remoteConn := n.Connections[message.To]
 	if remoteConn == nil {
 		//fmt.Printf("Connection to node %d isnt present in n.Connections\n", message.To)
-		return nil
+		return fmt.Errorf("No TCP connection to node %d in Connection Table", message.To)
 	}
 	if message.Type != "Heartbeat" {
 		fmt.Printf("SendMessage: From: %v (%d) To: %v (%d) Message: %v\n", remoteConn.LocalAddr(), n.Myself.ID, remoteConn.RemoteAddr(), message.To, message)
@@ -255,6 +255,7 @@ func (n *Network) SendMsgTo(msg Message, dst []int) {
 		err := n.SendMessage(msg)
 		if err != nil {
 			log.Print(err) //Spams error message when connection not established - how to fix?
+			continue
 		}
 	}
 }
@@ -287,7 +288,6 @@ func (n *Network) CloseConn(c *net.TCPConn) error {
 			}
 		}
 	}
-	fmt.Println("Network: Closing connection from", c.RemoteAddr())
 	mutex.Lock()
 	delete(n.Connections, nodeID)
 	mutex.Unlock()
