@@ -68,9 +68,9 @@ func main() {
 		select {
 		case receiveMsg := <-ReceiveChan:
 			if receiveMsg.Type != "Value" {
-				continue
+				fmt.Printf("\nClient: Received value %v from node %d", receiveMsg.Value, receiveMsg.From)
 			}
-			fmt.Printf("\nClient: Received value %v from node %d", receiveMsg.Value, receiveMsg.From)
+			//fmt.Printf("\nClient: Received value %v from node %d", receiveMsg.Value, receiveMsg.From)
 		case sendMsg := <-SendChan:
 			sendMessage(sendMsg, conn2props)
 			fmt.Println("\nClient: Sends value: ", sendMsg.Value)
