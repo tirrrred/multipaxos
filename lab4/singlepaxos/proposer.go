@@ -111,7 +111,6 @@ func (p *Proposer) handlePromise(prm Promise) (acc Accept, output bool) {
 	//cval = Constrained Consensus Value, i.e not freely choosen by the client/proposer.
 	//vrnd = Round in which a Value was Last Accepted
 	//vval = Value Last Accepted
-	fmt.Println("Promiser: handlePromise(prm) Start")
 
 	if prm.Rnd > p.crnd {
 		p.crnd = prm.Rnd
@@ -123,6 +122,7 @@ func (p *Proposer) handlePromise(prm Promise) (acc Accept, output bool) {
 
 	for _, prmReq := range p.PromiseRequests {
 		if prmReq.From == prm.From { //If we already got a promise request from this node
+			fmt.Println("Already received promise from this node - reject! Node: ", prm.From)
 			return Accept{}, false
 		}
 	}

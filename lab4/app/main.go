@@ -188,7 +188,7 @@ func main() {
 				fmt.Printf("Main: (Learner) %d got learn from %d: %v\n", appnet.Myself.ID, rMsg.From, rMsg.Learn)
 				learner.DeliverLearn(rMsg.Learn)
 			case rMsg.Type == "Value":
-				fmt.Printf("Main: (Clienthandler) %d got value from %d: %v\n", appnet.Myself.ID, rMsg.From, rMsg.Value)
+				fmt.Printf("\nMain: (Clienthandler) %d got value from %d: %v\n", appnet.Myself.ID, rMsg.From, rMsg.Value)
 				clihandler.DeliverValue(rMsg.Value)
 			}
 		case <-done:
