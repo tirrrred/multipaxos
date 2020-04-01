@@ -120,8 +120,11 @@ func (p *Proposer) handlePromise(prm Promise) (acc Accept, output bool) {
 	} else if prm.Rnd < p.crnd || prm.Rnd == NoRound {
 		return Accept{}, false
 	}
+	if prm.Rnd == p.crnd && prm.Vrnd != p.PromiseRequests[0].Vrnd {
+		p.PromiseRequests = nil
+	}
 
-	//p.crnd < prm.rnd at this stage?? UneccsaRY?
+	//p.crnd = prm.rnd at this stage
 	if len(p.PromiseRequests) > 0 {
 		for i, prmReq := range p.PromiseRequests {
 			if prmReq.From == prm.From { //If we already got a promise request from this node
@@ -187,6 +190,6 @@ func (p *Proposer) clientHandler(cVal Value) (prp Prepare, output bool) {
 		return Prepare{}, false
 	}
 	p.clientValue = cVal
-	defer p.increaseCrnd()
+	//p.increaseCrnd()
 	return Prepare{From: p.ID, Crnd: p.crnd}, true
 }
