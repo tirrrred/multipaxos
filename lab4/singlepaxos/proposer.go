@@ -115,26 +115,14 @@ func (p *Proposer) handlePromise(prm Promise) (acc Accept, output bool) {
 	if prm.Rnd > p.crnd {
 		p.crnd = prm.Rnd
 		p.PromiseRequests = nil
-		//p.PromiseRequests = append(p.PromiseRequests, prm)
-		//return Accept{}, false
+		return Accept{}, false
 	} else if prm.Rnd < p.crnd || prm.Rnd == NoRound {
 		return Accept{}, false
 	}
 
-	//p.crnd = prm.rnd at this stage
-	if len(p.PromiseRequests) > 0 {
-		if prm.Rnd == p.crnd && prm.Vrnd != p.PromiseRequests[0].Vrnd {
-			p.PromiseRequests = nil
-		} else {
-			for i, prmReq := range p.PromiseRequests {
-				if prmReq.From == prm.From { //If we already got a promise request from this node
-					if prmReq.Rnd < prm.Rnd { //Check if the new promise request has a bigger Rnd than the current (old) promise request
-						p.PromiseRequests[i] = prm //If yes, replace the old request with the new one
-					}
-				} else {
-					p.PromiseRequests = append(p.PromiseRequests, prm) //If we don't have a promise request from this node before, append it.
-				}
-			}
+	for _, prmReq := range p.PromiseRequests {
+		if prmReq.From == prm.From { //If we already got a promise request from this node
+			return Accept{}, false
 		}
 	}
 
