@@ -68,6 +68,7 @@ func (p *Proposer) Start() {
 			case prm := <-p.promiseChan:
 				if accMsg, sendMsg := p.handlePromise(prm); sendMsg == true {
 					p.AcceptOutChan <- accMsg
+					fmt.Println(p.PromiseRequests)
 				}
 			case cVal := <-p.clientValueChan:
 				if prpMsg, sendMsg := p.clientHandler(cVal); sendMsg == true {
@@ -126,6 +127,7 @@ func (p *Proposer) handlePromise(prm Promise) (acc Accept, output bool) {
 		}
 	}
 
+	//prm.Rnd == p.crnd
 	p.PromiseRequests = append(p.PromiseRequests, prm)
 	//If the proposer has gotten promise messages from a majority of acceptors
 	if len(p.PromiseRequests) >= p.NumNodes/2+1 {
