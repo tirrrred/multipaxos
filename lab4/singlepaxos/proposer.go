@@ -112,7 +112,7 @@ func (p *Proposer) handlePromise(prm Promise) (acc Accept, output bool) {
 	//vval = Value Last Accepted
 	fmt.Println("Promiser: handlePromise(prm) Start")
 
-	if prm.Rnd > p.crnd {
+	if prm.Rnd >= p.crnd {
 		p.crnd = prm.Rnd
 		p.PromiseRequests = nil
 		//p.PromiseRequests = append(p.PromiseRequests, prm)
