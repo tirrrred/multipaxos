@@ -120,9 +120,6 @@ func (p *Proposer) handlePromise(prm Promise) (acc Accept, output bool) {
 	} else if prm.Rnd < p.crnd || prm.Rnd == NoRound {
 		return Accept{}, false
 	}
-	if prm.Rnd == p.crnd && prm.Vrnd != p.PromiseRequests[0].Vrnd {
-		p.PromiseRequests = nil
-	}
 
 	//p.crnd = prm.rnd at this stage
 	if len(p.PromiseRequests) > 0 {
