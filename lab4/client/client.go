@@ -143,6 +143,7 @@ func listenOnConn(TCPconn *net.TCPConn, rChan chan network.Message) {
 			fmt.Print("Client: listenOnConn error: ", err)
 			fmt.Println("\tClosing TCP connection: ", TCPconn.RemoteAddr())
 			TCPconn.Close()
+			break
 		}
 		message := new(network.Message)
 		err = json.Unmarshal(buffer[0:len], &message)
