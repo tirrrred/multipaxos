@@ -113,8 +113,9 @@ func (p *Proposer) handlePromise(prm Promise) (acc Accept, output bool) {
 	//vval = Value Last Accepted
 
 	if prm.Rnd > p.crnd {
-		p.crnd = prm.Rnd
-		p.PromiseRequests = nil
+		//p.crnd = prm.Rnd
+		p.increaseCrnd()
+		//p.PromiseRequests = nil
 		return Accept{}, false
 	} else if prm.Rnd < p.crnd || prm.Rnd == NoRound {
 		return Accept{}, false
@@ -159,6 +160,7 @@ func (p *Proposer) handlePromise(prm Promise) (acc Accept, output bool) {
 func (p *Proposer) increaseCrnd() {
 	//TODO(student): Task 2 - algorithm implementation
 	p.crnd += Round(p.NumNodes)
+	p.PromiseRequests = nil
 	return
 }
 
