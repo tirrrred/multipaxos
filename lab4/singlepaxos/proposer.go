@@ -2,17 +2,10 @@
 
 package singlepaxos
 
-<<<<<<< HEAD
-import (
-	"fmt"
-	"github.com/dat520-2020/assignments/lab3/detector"
-)
-=======
 import (
 	"dat520/lab3/detector"
 	"fmt"
 )
->>>>>>> 8b6d2c96ad685631631c1aa52bf59dfb73220758
 
 // Proposer represents a proposer as defined by the single-decree Paxos
 // algorithm.
