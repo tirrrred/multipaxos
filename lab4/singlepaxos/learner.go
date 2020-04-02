@@ -2,8 +2,6 @@
 
 package singlepaxos
 
-import "fmt"
-
 // Learner represents a learner as defined by the single-decree Paxos
 // algorithm.
 type Learner struct {
