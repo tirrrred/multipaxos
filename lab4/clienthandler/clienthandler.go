@@ -15,8 +15,8 @@ module, which in turn should forward it to _every_ connected client.
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/tirrrred/multipaxos/lab3/network"
-	"github.com/tirrrred/multipaxos/lab4/singlepaxos"
+	"github.com/dat520-2020/assignments/lab3/network"
+	"github.com/dat520-2020/assignments/lab4/singlepaxos"
 	"log"
 	"net"
 )

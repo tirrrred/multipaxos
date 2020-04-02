@@ -20,8 +20,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/tirrrred/multipaxos/lab3/network"
-	"github.com/tirrrred/multipaxos/lab4/singlepaxos"
+	"github.com/dat520-2020/assignments/lab3/network"
+	"github.com/dat520-2020/assignments/lab4/singlepaxos"
 	"io"
 	"io/ioutil"
 	"log"

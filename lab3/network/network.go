@@ -7,7 +7,7 @@ import (
 	"net"
 	//"os"
 	"encoding/json"
-	"github.com/tirrrred/multipaxos/lab4/singlepaxos"
+	"github.com/dat520-2020/assignments/lab4/singlepaxos"
 	"strconv"
 	"strings"
 	"sync"

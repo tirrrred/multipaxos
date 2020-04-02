@@ -4,7 +4,7 @@ package singlepaxos
 
 import (
 	"fmt"
-	"github.com/tirrrred/multipaxos/lab3/detector"
+	"github.com/dat520-2020/assignments/lab3/detector"
 )
 
 // Proposer represents a proposer as defined by the single-decree Paxos

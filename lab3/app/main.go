@@ -7,8 +7,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/tirrrred/multipaxos/lab3/detector"
-	"github.com/tirrrred/multipaxos/lab3/network"
+	"github.com/dat520-2020/assignments/lab3/detector"
+	"github.com/dat520-2020/assignments/lab3/network"
 	"io/ioutil"
 	"log"
 	"os"
