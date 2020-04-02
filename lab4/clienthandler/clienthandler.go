@@ -13,10 +13,10 @@ module, which in turn should forward it to _every_ connected client.
 */
 
 import (
+	"dat520/lab3/network"
+	"dat520/lab4/singlepaxos"
 	"encoding/json"
 	"fmt"
-	"github.com/dat520-2020/assignments/lab3/network"
-	"github.com/dat520-2020/assignments/lab4/singlepaxos"
 	"log"
 	"net"
 )

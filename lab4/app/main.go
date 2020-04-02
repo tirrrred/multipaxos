@@ -5,12 +5,12 @@ package main
 //Use it own NodeID as unique round number (rnd). Current round = (Crnd) and Voted round = (Vrnd) -> Type conversion. IncreaseCrnd adds the number of Paxos nodes to this unique round number (NodeID)
 
 import (
+	"dat520/lab3/detector"
+	"dat520/lab3/network"
+	"dat520/lab4/clienthandler"
+	"dat520/lab4/singlepaxos"
 	"encoding/json"
 	"fmt"
-	"github.com/dat520-2020/assignments/lab3/detector"
-	"github.com/dat520-2020/assignments/lab3/network"
-	"github.com/dat520-2020/assignments/lab4/clienthandler"
-	"github.com/dat520-2020/assignments/lab4/singlepaxos"
 	"io/ioutil"
 	"log"
 	"os"

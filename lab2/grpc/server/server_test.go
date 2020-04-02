@@ -1,15 +1,14 @@
 package server
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"strconv"
 	"strings"
 	"testing"
 
-	"golang.org/x/net/context"
-
-	pb "github.com/dat520-2020/assignments/lab2/grpc/proto"
+	pb "dat520/lab2/grpc/proto"
 )
 
 func TestGRPCServer(t *testing.T) {
