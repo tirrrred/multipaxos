@@ -187,6 +187,9 @@ func (p *Proposer) constrainedValue(prmReqs []Promise) (val Value, output bool) 
 func (p *Proposer) clientHandler(cVal Value) (prp Prepare, output bool) {
 	leaderNode := p.LeaderDetector.Leader()
 	if leaderNode != p.ID {
+		if prp.Crnd > p.crnd {
+			p.increaseCrnd()
+		}
 		return Prepare{}, false
 	}
 	p.clientValue = cVal
