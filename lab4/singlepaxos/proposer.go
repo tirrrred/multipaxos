@@ -130,7 +130,7 @@ func (p *Proposer) handlePromise(prm Promise) (acc Accept, output bool) {
 
 	for _, prmReq := range p.PromiseRequests {
 		if prmReq.From == prm.From { //If we already got a promise request from this node
-			fmt.Println("Already received promise from this node - reject! Node: ", prm.From)
+			//fmt.Println("Already received promise from this node - reject! Node: ", prm.From)
 			return Accept{}, false
 		}
 	}
@@ -143,12 +143,12 @@ func (p *Proposer) handlePromise(prm Promise) (acc Accept, output bool) {
 		if cstrVal, status := p.constrainedValue(p.PromiseRequests); status == true { //re-name these variables, bad names
 			//If yes, set the constrainedValue with the majority values from the acceptors
 			p.ConstrainedValue = cstrVal
-			fmt.Println("Promiser: handlePromise(prm) return constraintedValue, true")
+			//fmt.Println("Promiser: handlePromise(prm) return constraintedValue, true")
 			return Accept{From: p.ID, Rnd: p.crnd, Val: p.ConstrainedValue}, true
 		}
 		//If there is no majority values out there, use my clientValue (Due to the test, set a dummy value first)
 		//p.clientValue = Value("defaultValue")
-		fmt.Println("Promiser: handlePromise(prm) return clientvalue, true")
+		//fmt.Println("Promiser: handlePromise(prm) return clientvalue, true")
 		return Accept{From: p.ID, Rnd: p.crnd, Val: p.clientValue}, true
 	}
 	return Accept{}, false

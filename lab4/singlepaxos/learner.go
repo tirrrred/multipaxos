@@ -2,8 +2,6 @@
 
 package singlepaxos
 
-import "fmt"
-
 // Learner represents a learner as defined by the single-decree Paxos
 // algorithm.
 type Learner struct {
@@ -103,7 +101,7 @@ func (l *Learner) handleLearn(learn Learn) (val Value, output bool) {
 	if len(l.LrnVals) >= l.NumNodes/2+1 { //If we learned values from a majority of acceptors
 		//Check if any value gives a majority
 		if verifiedValue, majorityFound := l.majorityValue(l.LrnVals); majorityFound == true {
-			fmt.Printf("Learner: Consensus reached on value: %v\n", verifiedValue)
+			//fmt.Printf("Learner: Consensus reached on value: %v\n", verifiedValue)
 			l.ConsensusValue = verifiedValue
 			return verifiedValue, true
 		}
@@ -115,7 +113,7 @@ func (l *Learner) handleLearn(learn Learn) (val Value, output bool) {
 	//From 0, Round 5, Foo
 	//From 1, Round 5, Bar
 	//From 2, Round 5, Foo
-	fmt.Printf("Learner: Consensus not reached for value: %v\n", learn.Val)
+	//fmt.Printf("Learner: Consensus not reached for value: %v\n", learn.Val)
 	return "", false
 }
 
