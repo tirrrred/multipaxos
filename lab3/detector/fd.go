@@ -64,7 +64,7 @@ func NewEvtFailureDetector(id int, nodeIDs []int, sr SuspectRestorer, delta time
 		delta: delta,
 
 		hbSend: hbSend,
-		hbIn:   make(chan Heartbeat, 8),
+		hbIn:   make(chan Heartbeat, 24),
 		stop:   make(chan struct{}),
 
 		testingHook: func() {}, // DO NOT REMOVE THIS LINE. A no-op when not testing.

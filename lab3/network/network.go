@@ -204,8 +204,8 @@ var syncMutex = &sync.Mutex{}
 
 //SendMessage sends a message
 func (n *Network) SendMessage(message Message) (err error) {
-	syncMutex.Lock()
-	defer syncMutex.Unlock()
+	//syncMutex.Lock()
+	//defer syncMutex.Unlock()
 
 	if message.To == n.Myself.ID {
 		n.ReceiveChan <- message
