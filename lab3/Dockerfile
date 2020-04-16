@@ -11,7 +11,7 @@ RUN apk update && apk upgrade && \
 # - docker run --rm debian:stretch grep '^hosts:' /etc/nsswitch.conf
 RUN [ ! -e /etc/nsswitch.conf ] && echo 'hosts: files dns' > /etc/nsswitch.conf
 
-ENV GOLANG_VERSION 1.10.4
+ENV GOLANG_VERSION 1.14
 
 RUN set -eux; \
 	apk add --no-cache --virtual .build-deps \

@@ -61,8 +61,8 @@ var mutex = &sync.Mutex{}
 
 //InitNetwork defines necessary parameteres about the network
 func InitNetwork(nodes []Node, myself int) (network Network, err error) {
-	rC := make(chan Message, 30)
-	sC := make(chan Message, 30)
+	rC := make(chan Message, 3000) //Increased for TS
+	sC := make(chan Message, 3000) //Increased for TS
 	ccC := make(chan *net.TCPConn, 16)
 	network = Network{
 		Nodes:          []Node{},
@@ -204,8 +204,8 @@ var syncMutex = &sync.Mutex{}
 
 //SendMessage sends a message
 func (n *Network) SendMessage(message Message) (err error) {
-	syncMutex.Lock()
-	defer syncMutex.Unlock()
+	//syncMutex.Lock()
+	//defer syncMutex.Unlock()
 
 	if message.To == n.Myself.ID {
 		n.ReceiveChan <- message
