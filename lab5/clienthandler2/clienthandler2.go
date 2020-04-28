@@ -40,18 +40,20 @@ func NewClientHandler(id int, proposer *multipaxos.Proposer, ld detector.LeaderD
 //Start starts the Clienthandler main loop
 func (ch *ClientHandler) Start() {
 	ldCHG := ch.ld.Subscribe()
-	for {
-		select {
-		case cConn := <-ch.ClientConnChan:
-			ch.ClientConnsSlice = append(ch.ClientConnsSlice, cConn)
-			ch.GetClientInfo(cConn)
-		case cliVal := <-ch.ClientValueChanIn:
-			if ch.id != ch.leader { //If this node is not the leader node
-				ch.Redirect(cliVal)
+	go func() {
+		for {
+			select {
+			case cConn := <-ch.ClientConnChan:
+				ch.ClientConnsSlice = append(ch.ClientConnsSlice, cConn)
+				ch.GetClientInfo(cConn)
+			case cliVal := <-ch.ClientValueChanIn:
+				if ch.id != ch.leader { //If this node is not the leader node
+					ch.Redirect(cliVal)
+				}
+				ch.proposer.DeliverClientValue(cliVal)
+			case newLeader := <-ldCHG:
+				ch.leader = newLeader
 			}
-			ch.proposer.DeliverClientValue(cliVal)
-		case newLeader := <-ldCHG:
-			ch.leader = newLeader
 		}
 	}
 }

@@ -34,7 +34,7 @@ func main() {
 	//subscribe to leader changes
 	ldChan := ld.Subscribe()
 	fmt.Printf("\nLeader after ld init and subsribtion: %d\n", ld.Leader())
-	fmt.Printf("Proposers: %v, ld: %v, ldChan: %v", netconf.Proposers, ld, ldChan)
+	fmt.Printf("Proposers: %v, ld: %v, ldChan: %v\n", netconf.Proposers, ld, ldChan)
 
 	//Declare PAXOS variables:
 	var proposer *multipaxos.Proposer
