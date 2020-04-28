@@ -73,7 +73,7 @@ func main() {
 				fmt.Println("Client: Redirected to node " + strconv.Itoa(1))
 				reconnect(rMsg.RedirectNode)
 			case "Getinfo":
-				deliverClientInfo(rMsg, myID)
+				deliverClientInfo(rMsg, myID, connTable[rMsg.From])
 			case "Value":
 				if rMsg.Value.ClientSeq == reqSeq {
 					mu.Lock()
@@ -280,10 +280,10 @@ func importNetConf() (network.NetConfig, error) {
 	return netconf, nil
 }
 
-func deliverClientInfo(msg network.Message, id string) {
+func deliverClientInfo(msg network.Message, id string, conn *net.TCPConn) {
 	cliInfo := network.ClientInfo{
 		ClientID: id,
-		Conn:     connTable[msg.From],
+		Conn:     conn,
 	}
 
 	cliMsg := network.Message{
