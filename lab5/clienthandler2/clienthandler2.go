@@ -55,7 +55,7 @@ func (ch *ClientHandler) Start() {
 				ch.leader = newLeader
 			}
 		}
-	}
+	}()
 }
 
 //DeliverClientValue send client value to the channel clientValueChanIn so the clienthandler can handle the value
