@@ -7,6 +7,7 @@ import (
 	"dat520/lab5/multipaxos"
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"math/rand"
@@ -198,7 +199,7 @@ func connectToNodes(nodes []network.Node) {
 				//continue
 			}
 			connTable[n.ID] = TCPconn
-			fmt.Println(connTable)
+			listenOnConn(TCPconn, ReceiveChan)
 		}(node)
 		networkNodes = append(networkNodes, node)
 	}
@@ -291,5 +292,30 @@ func deliverClientInfo(msg network.Message) {
 	err := sendMessage(msg.From, cliMsg)
 	if err != nil {
 		log.Print(err)
+	}
+}
+
+func listenOnConn(TCPconn *net.TCPConn, rChan chan network.Message) {
+	defer TCPconn.Close()
+	buffer := make([]byte, 10240, 10240)
+	for {
+		len, err := TCPconn.Read(buffer[0:])
+		if err != nil {
+			if err == io.EOF {
+				fmt.Println(string(buffer[:len]))
+			}
+			fmt.Print("Client: listenOnConn error: ", err)
+			fmt.Println("\tClosing TCP connection: ", TCPconn.RemoteAddr())
+			TCPconn.Close()
+			break
+		}
+		message := new(network.Message)
+		err = json.Unmarshal(buffer[0:len], &message)
+		if err != nil {
+			log.Print(err)
+			fmt.Println(string(buffer[0:len]))
+			continue
+		}
+		rChan <- *message
 	}
 }
