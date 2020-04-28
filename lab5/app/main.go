@@ -34,6 +34,7 @@ func main() {
 	//subscribe to leader changes
 	ldChan := ld.Subscribe()
 	fmt.Printf("\nLeader after ld init and subsribtion: %d\n", ld.Leader())
+	fmt.Printf("Proposers: %v, ld: %v, ldChan: %v", netconf.Proposers, ld, ldChan)
 
 	//Declare PAXOS variables:
 	var proposer *multipaxos.Proposer
@@ -93,7 +94,7 @@ func main() {
 			fmt.Printf("\nNew leader: %d \n", newLeader)
 		//Sending Heartbeat
 		case hb := <-hbSend: //If hb reply
-			//fmt.Printf("\n{From: %v, To: %v, Request: %v}\n", hb.From, hb.To, hb.Request)
+			fmt.Printf("\n{From: %v, To: %v, Request: %v}\n", hb.From, hb.To, hb.Request)
 			//Send hearbeat
 			sendHBmsg := network.Message{
 				Type:    "Heartbeat",
@@ -185,7 +186,6 @@ func main() {
 			os.Exit(0)
 		}
 	}
-
 }
 
 func importNetConf() (network.NetConfig, error) {
