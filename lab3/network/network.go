@@ -2,11 +2,13 @@ package network
 
 import (
 	//"bufio"
+	"dat520/lab5/multipaxos"
 	"fmt"
 	"log"
 	"net"
+
 	//"os"
-	"dat520/lab4/singlepaxos"
+
 	"encoding/json"
 	"strconv"
 	"strings"
@@ -45,16 +47,24 @@ type Network struct {
 
 //Message struct
 type Message struct {
-	Type    string //Type of Message: Heartbeat, Prepare, Promise, Accept, Learn, Value
-	To      int    //Node ID
-	From    int    //Node ID
-	Msg     string //Client message
-	Request bool   //true -> request, false -> reply
-	Promise singlepaxos.Promise
-	Accept  singlepaxos.Accept
-	Prepare singlepaxos.Prepare
-	Learn   singlepaxos.Learn
-	Value   singlepaxos.Value
+	Type         string     //Type of Message: Heartbeat, Prepare, Promise, Accept, Learn, Value, Redirect, Getinfo
+	To           int        //Node ID
+	From         int        //Node ID
+	Msg          string     //Client message
+	RedirectNode int        //Node ID to redirect connection to (if type == 'Redirect'). Used between clienthandler and client
+	Request      bool       //true -> request, false -> reply
+	ClientInfo   ClientInfo //Used to get clientinfo (like clientID) -> If type == 'Getinfo'
+	Promise      multipaxos.Promise
+	Accept       multipaxos.Accept
+	Prepare      multipaxos.Prepare
+	Learn        multipaxos.Learn
+	Value        multipaxos.Value
+}
+
+//ClientInfo is used to get ClientID from given TCPconn
+type ClientInfo struct {
+	ClientID string
+	Conn     *net.TCPConn
 }
 
 var mutex = &sync.Mutex{}
@@ -63,7 +73,7 @@ var mutex = &sync.Mutex{}
 func InitNetwork(nodes []Node, myself int) (network Network, err error) {
 	rC := make(chan Message, 3000) //Increased for TS
 	sC := make(chan Message, 3000) //Increased for TS
-	ccC := make(chan *net.TCPConn, 16)
+	ccC := make(chan *net.TCPConn, 3000)
 	network = Network{
 		Nodes:          []Node{},
 		Connections:    map[int]*net.TCPConn{},

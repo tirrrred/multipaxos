@@ -42,8 +42,8 @@ func NewLearner(id int, nrOfNodes int, valueOut chan<- Value) *Learner {
 		ConsensusValue: ZeroValue,
 		NumNodes:       nrOfNodes,
 		ValueOutChan:   valueOut,
-		stopChan:       make(chan int, 16),
-		learnChan:      make(chan Learn, 16),
+		stopChan:       make(chan int, 3000),
+		learnChan:      make(chan Learn, 3000),
 	}
 }
 

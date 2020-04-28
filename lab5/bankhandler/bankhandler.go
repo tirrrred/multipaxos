@@ -4,7 +4,7 @@ type BankHandler struct {
 }
 
 func NewBankHandler() {
-	return &BankHandler{}
+	//return &BankHandler{}
 }
 
 func (bh *BankHandler) Start() {

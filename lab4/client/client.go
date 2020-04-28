@@ -34,8 +34,8 @@ func main() {
 	fmt.Println("Hello client app")
 
 	//Create channels
-	ReceiveChan := make(chan network.Message, 16)
-	SendChan := make(chan network.Message, 16)
+	ReceiveChan := make(chan network.Message, 3000)
+	SendChan := make(chan network.Message, 3000)
 
 	//import network configuration based on netConfig.json file
 	netconf, _ := importNetConf()
@@ -133,7 +133,7 @@ func connToProposers(props []int, nodes []network.Node, propConnMap map[int]*net
 
 func listenOnConn(TCPconn *net.TCPConn, rChan chan network.Message) {
 	defer TCPconn.Close()
-	buffer := make([]byte, 1024, 1024)
+	buffer := make([]byte, 10240, 10240)
 	for {
 		len, err := TCPconn.Read(buffer[0:])
 		if err != nil {

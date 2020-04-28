@@ -40,7 +40,7 @@ func main() {
 	ld := detector.NewMonLeaderDetector(netconf.Proposers) //*MonLeaderDetector
 
 	//create failure detector
-	hbSend := make(chan detector.Heartbeat, 24)
+	hbSend := make(chan detector.Heartbeat, 3000)
 	fd := detector.NewEvtFailureDetector(appnet.Myself.ID, nodeIDs, ld, 2*time.Second, hbSend) //2 second timeout for failure detector - Increase/Decrease?
 
 	//subscribe to leader changes
@@ -60,21 +60,21 @@ func main() {
 	//Implement PAXOS roles:
 	if iAMa(netconf.Proposers, appnet.Myself.ID) { //If I'am a proposer
 		fmt.Println("I am a PROPOSER!")
-		prepareOutChan = make(chan singlepaxos.Prepare, 16)
-		acceptOutChan = make(chan singlepaxos.Accept, 16)
+		prepareOutChan = make(chan singlepaxos.Prepare, 3000)
+		acceptOutChan = make(chan singlepaxos.Accept, 3000)
 		proposer = singlepaxos.NewProposer(appnet.Myself.ID, len(netconf.Acceptors), ld, prepareOutChan, acceptOutChan) //NewProposer func(id int, nrOfNodes int, ld detector.LeaderDetector, prepareOut chan<- Prepare, acceptOut chan<- Accept) *Proposer
 		proposer.Start()
 	}
 	if iAMa(netconf.Acceptors, appnet.Myself.ID) { //If I'am a acceptor
 		fmt.Println("I am a ACCEPTOR!")
-		promiseOutChan = make(chan singlepaxos.Promise, 16)
-		learnOutChan = make(chan singlepaxos.Learn, 16)
+		promiseOutChan = make(chan singlepaxos.Promise, 3000)
+		learnOutChan = make(chan singlepaxos.Learn, 3000)
 		acceptor = singlepaxos.NewAcceptor(appnet.Myself.ID, promiseOutChan, learnOutChan) //NewAcceptor func(id int, promiseOut chan<- Promise, learnOut chan<- Learn) *Acceptor
 		acceptor.Start()
 	}
 	if iAMa(netconf.Learners, appnet.Myself.ID) { //If I'am a learner
 		fmt.Println("I am a LEARNER!")
-		valueOutChan = make(chan singlepaxos.Value, 16)
+		valueOutChan = make(chan singlepaxos.Value, 3000)
 		learner = singlepaxos.NewLearner(appnet.Myself.ID, len(netconf.Acceptors), valueOutChan) //NewLearner func(id int, nrOfNodes int, valueOut chan<- Value) *Learner
 		learner.Start()
 	}

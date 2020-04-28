@@ -73,7 +73,7 @@ func (m *MonLeaderDetector) Restore(id int) {
 // subscriber; it is not meant to be shared.
 func (m *MonLeaderDetector) Subscribe() <-chan int {
 	// TODO(student): Implement
-	c := make(chan int, 2)                   //makes a channel for subscribing process
+	c := make(chan int, 3000)                //makes a channel for subscribing process
 	m.subscribers = append(m.subscribers, c) //Appends the newly creates channel to the list of all subscribers (with their channels)
 	return c                                 //returns the channel to the subscriber
 

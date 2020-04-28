@@ -39,8 +39,8 @@ func NewClientHandler(id int, proposer *singlepaxos.Proposer, clConnChan chan *n
 	return &ClientHandler{
 		ID:              id,
 		proposer:        proposer,
-		ClientValueChan: make(chan singlepaxos.Value),
-		LearnValueChan:  make(chan singlepaxos.Value),
+		ClientValueChan: make(chan singlepaxos.Value, 3000),
+		LearnValueChan:  make(chan singlepaxos.Value, 3000),
 		ClientConns:     []*net.TCPConn{},
 		ClientConnChan:  clConnChan,
 	}

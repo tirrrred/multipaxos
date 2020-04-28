@@ -52,8 +52,8 @@ func NewProposer(id int, nrOfNodes int, ld detector.LeaderDetector, prepareOut c
 		LeaderDetector:   ld,
 		PrepareOutChan:   prepareOut,
 		AcceptOutChan:    acceptOut,
-		promiseChan:      make(chan Promise, 16),
-		clientValueChan:  make(chan Value, 16),
+		promiseChan:      make(chan Promise, 3000),
+		clientValueChan:  make(chan Value, 3000),
 		stopChan:         make(chan int),
 	}
 }
