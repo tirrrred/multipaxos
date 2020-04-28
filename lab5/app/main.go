@@ -102,6 +102,7 @@ func main() {
 				Msg:     "random message",
 				Request: hb.Request,
 			}
+			fmt.Println("Sending Heartbeat")
 			appnet.SendChan <- sendHBmsg //Send sendHBmsg on sendChan
 		//Send Prepare from proposer to acceptors
 		case prp := <-prepareOutChan:
