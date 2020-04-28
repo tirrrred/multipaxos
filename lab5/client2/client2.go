@@ -291,7 +291,7 @@ func deliverClientInfo(msg network.Message, id string, conn *net.TCPConn) {
 		To:         msg.From,
 		ClientInfo: cliInfo,
 	}
-
+	fmt.Println("Sending client Info ", cliMsg)
 	err := sendMessage(msg.From, cliMsg)
 	if err != nil {
 		log.Print(err)
