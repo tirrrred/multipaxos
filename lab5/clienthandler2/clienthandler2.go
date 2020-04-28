@@ -5,6 +5,7 @@ import (
 	"dat520/lab3/network"
 	"dat520/lab5/multipaxos"
 	"encoding/json"
+	"fmt"
 	"log"
 	"net"
 )
@@ -70,6 +71,7 @@ func (ch *ClientHandler) DeliverClientValue(val multipaxos.Value) {
 
 //DeliverClientInfo delivers client information from client -> invoked when running ch.GetClientInfo() func
 func (ch *ClientHandler) DeliverClientInfo(cliMsg network.Message) {
+	fmt.Printf("ClienterHandler %d: Got client info from %v", ch.id, cliMsg.ClientInfo.ClientID)
 	clientInfo := cliMsg.ClientInfo
 	ch.ClientConnsMap[clientInfo.ClientID] = clientInfo.Conn
 }
