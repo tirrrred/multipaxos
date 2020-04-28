@@ -53,10 +53,12 @@ func main() {
 				fmt.Println(err)
 				continue
 			}
-			fmt.Println(val)
+			//fmt.Println(val)
 			seqCmd[seqNum] = val //Add Command/Value to sequence map
-			fmt.Println(seqCmd)
+			//fmt.Println(seqCmd)
 			//status := syncTxRx(msg) //A client should always send requests synchronously, i.e. wait for a response to the previous request before sending a new one
+			fmt.Println("networkNodes[]: ", networkNodes)
+			fmt.Println("connTable map[int]TCPconn: ", connTable)
 			if responseOK {
 				syncTxRx(seqCmd[reqSeq+1])
 			}
@@ -203,6 +205,7 @@ func connectToNodes(nodes []network.Node) {
 		}(node)
 		networkNodes = append(networkNodes, node)
 	}
+
 	currentConn = nodes[0].ID //Starts to use node 0 as a starting point for sending values
 }
 
