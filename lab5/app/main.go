@@ -140,10 +140,9 @@ func main() {
 			}
 			fmt.Printf("Main: (Acceptor) %d sent learn to learners %v: %v\n", appnet.Myself.ID, netconf.Learners, lrn)
 			appnet.SendMsgTo(lrnMsg, netconf.Learners)
-			//Send decided value from learner to client(handler)?
-			//case decidedVal := <-decidedOutChan:
-			//newclienthandler?
-			//Receive message - switch to decide which message type received and how to handle it accordingly. May this be a bottleneck when scaled, since it is a serial switch, and a node can receive alot of messages?
+		case decidedValue := <-decidedOutChan:
+			fmt.Printf("Main: (Learner) %d sent decided value to client\n", appnet.Myself.ID)
+			clihandler.SendValToCli(decidedValue)
 		case rMsg := <-appnet.ReceiveChan:
 			switch {
 			case rMsg.Type == "Heartbeat":

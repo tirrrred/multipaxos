@@ -106,3 +106,8 @@ func (ch *ClientHandler) Redirect(val multipaxos.Value) {
 		log.Print(err)
 	}
 }
+
+//SendValToCli sends decidedValueToClient
+func (ch *ClientHandler) SendValToCli(dVal multipaxos.DecidedValue) {
+	return
+}

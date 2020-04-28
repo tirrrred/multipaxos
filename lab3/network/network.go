@@ -232,7 +232,7 @@ func (n *Network) SendMessage(message Message) (err error) {
 		//fmt.Printf("Connection to node %d isnt present in n.Connections\n", message.To)
 		return fmt.Errorf("No TCP connection to node %d in Connection Table", message.To)
 	}
-	if message.Type != "Heartbeat" {
+	if message.Type != "Heartbeat1" { //Remove 1 to block printing of HB messages
 		fmt.Printf("SendMessage: From: %v (%d) To: %v (%d) Message: %v\n", remoteConn.LocalAddr(), n.Myself.ID, remoteConn.RemoteAddr(), message.To, message)
 	}
 	_, err = n.Connections[message.To].Write(messageByte)

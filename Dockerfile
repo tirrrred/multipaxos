@@ -7,6 +7,8 @@ ENV GO111MODULE=on \
     GOOS=linux \
     GOARCH=amd64
 
+WORKDIR /dummyGo
+
 # Copy and download dependency using go mod
 COPY go.mod .
 #COPY go.sum .
