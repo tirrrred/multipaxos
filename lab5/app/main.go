@@ -94,7 +94,7 @@ func main() {
 			fmt.Printf("\nNew leader: %d \n", newLeader)
 		//Sending Heartbeat
 		case hb := <-hbSend: //If hb reply
-			fmt.Printf("\n{From: %v, To: %v, Request: %v}\n", hb.From, hb.To, hb.Request)
+			//fmt.Printf("\n{From: %v, To: %v, Request: %v}\n", hb.From, hb.To, hb.Request)
 			//Send hearbeat
 			sendHBmsg := network.Message{
 				Type:    "Heartbeat",
@@ -103,7 +103,7 @@ func main() {
 				Msg:     "random message",
 				Request: hb.Request,
 			}
-			fmt.Println("Sending Heartbeat")
+			//fmt.Println("Sending Heartbeat")
 			appnet.SendChan <- sendHBmsg //Send sendHBmsg on sendChan
 		//Send Prepare from proposer to acceptors
 		case prp := <-prepareOutChan:
