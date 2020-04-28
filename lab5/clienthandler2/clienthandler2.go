@@ -105,6 +105,7 @@ func (ch *ClientHandler) Redirect(val multipaxos.Value) {
 	if err != nil {
 		log.Print("ClientHandler - Redirect: json.Marshal: ", err)
 	}
+	fmt.Printf("cConn: %v, RemoteAddr: %v", cConn, cConn.RemoteAddr().String)
 	_, err = cConn.Write(messageByte)
 	if err != nil {
 		log.Print("ClientHandler - Redirect: cConn.Write: ", err)
