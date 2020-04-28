@@ -103,11 +103,11 @@ func (ch *ClientHandler) Redirect(val multipaxos.Value) {
 	}
 	messageByte, err := json.Marshal(redirMsg)
 	if err != nil {
-		log.Print(err)
+		log.Print("ClientHandler - Redirect: json.Marshal: ", err)
 	}
 	_, err = cConn.Write(messageByte)
 	if err != nil {
-		log.Print(err)
+		log.Print("ClientHandler - Redirect: cConn.Write: ", err)
 	}
 }
 
