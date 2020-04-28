@@ -1,6 +1,6 @@
 module dat520
 
-go 1.13.5
+go 1.14
 
 require (
 	github.com/golang/protobuf v1.3.5
