@@ -260,7 +260,7 @@ func sendMessage(nodeID int, message network.Message) error {
 		return err
 	}
 	if conn, ok := connTable[nodeID]; ok {
-		bytes, err := conn.Write(messageByte)
+		_, err := conn.Write(messageByte)
 		//fmt.Println("Client: Sends message of size (bytes): ", bytes)
 		if err != nil {
 			log.Print(err)
