@@ -234,7 +234,7 @@ func reconnect(rMsg network.Message, val multipaxos.Value, timeout bool) {
 	//fmt.Printf(" Received value seq: \t%d\n Expected value seq: \t%d\n Current Conn: \t\t%d\n New Conn: \t\t%d\n", rMsg.Value.ClientSeq, reqSeq, currentConn, rMsg.RedirectNode)
 	nodeID := rMsg.RedirectNode
 	cSeq := rMsg.Value.ClientSeq
-	if timeout != false {
+	if timeout == false {
 		//Check if we got a active connection for given nodeID
 		if _, ok := connTable[nodeID]; ok {
 			currentConn = nodeID
