@@ -31,6 +31,7 @@ var (
 	ReceiveChan    = make(chan network.Message, 3000) //Create channels
 	SendChan       = make(chan network.Message, 3000) //Create channels
 	responseOK     = true
+	responseTimer  *time.Ticker
 	mu             sync.Mutex
 )
 
@@ -40,6 +41,9 @@ func main() {
 	connectToNodes(netconf.Nodes)
 
 	myID := generateID(10)
+
+	responseTimer = time.NewTicker(6 * time.Second)
+	responseTimer.Stop()
 	//Clients send command loop - Manual mode
 	go func() {
 		scanner := bufio.NewScanner(os.Stdin)
@@ -72,10 +76,11 @@ func main() {
 			switch rMsg.Type {
 			case "Redirect":
 				fmt.Println("Client: Redirected to node " + strconv.Itoa(rMsg.RedirectNode))
-				reconnect(rMsg, seqCmd[rMsg.Value.ClientSeq])
+				reconnect(rMsg, seqCmd[rMsg.Value.ClientSeq], false)
 			case "Getinfo":
 				deliverClientInfo(rMsg, myID, connTable[rMsg.From])
 			case "Response":
+				responseTimer.Stop()
 				//fmt.Printf("Got value form node %d: ClientSeq = %d and reqSeq = %d\n", rMsg.From, rMsg.Value.ClientSeq, reqSeq)
 				if rMsg.Response.ClientSeq == reqSeq {
 					mu.Lock()
@@ -90,12 +95,21 @@ func main() {
 		case sMsg := <-SendChan:
 			switch sMsg.Type {
 			case "Value":
-				fmt.Printf("Client: Sending transaction to node %d: \nAccount %d %v %d\n", sMsg.To, sMsg.Value.AccountNum, sMsg.Value.Txn.Op, sMsg.Value.Txn.Amount)
+				fmt.Printf("Client: Sending transaction to node %d: \nAccount: %d | %v: %d\n", sMsg.To, sMsg.Value.AccountNum, sMsg.Value.Txn.Op, sMsg.Value.Txn.Amount)
 				err := sendMessage(currentConn, sMsg)
 				if err != nil {
 					log.Print(err)
 				}
 			}
+		case <-responseTimer.C:
+			fmt.Printf("Client command request timed out...\n Reconnecting to another node\n")
+			reVal := seqCmd[reqSeq]
+			reMsg := network.Message{
+				To:    currentConn,
+				Type:  "Value",
+				Value: reVal,
+			}
+			reconnect(reMsg, reVal, true)
 		}
 	}
 }
@@ -188,6 +202,7 @@ func syncTxRx(val multipaxos.Value) {
 		Value: val,
 	}
 	SendChan <- msg
+	responseTimer = time.NewTicker(6 * time.Second)
 	//responseTimer := time.NewTicker(5 * time.Second)
 	//msgSent = true
 }
@@ -215,39 +230,47 @@ func connectToNodes(nodes []network.Node) {
 	currentConn = nodes[0].ID //Starts to use node 0 as a starting point for sending values
 }
 
-func reconnect(rMsg network.Message, val multipaxos.Value) {
+func reconnect(rMsg network.Message, val multipaxos.Value, timeout bool) {
 	//fmt.Printf(" Received value seq: \t%d\n Expected value seq: \t%d\n Current Conn: \t\t%d\n New Conn: \t\t%d\n", rMsg.Value.ClientSeq, reqSeq, currentConn, rMsg.RedirectNode)
 	nodeID := rMsg.RedirectNode
 	cSeq := rMsg.Value.ClientSeq
-
-	//Check if we got a active connection for given nodeID
-	if _, ok := connTable[nodeID]; ok {
-		currentConn = nodeID
-		//fmt.Println("Current Connection is to Node: ", currentConn)
-	} else {
-		fmt.Println("Don't have any active TCP connection for given NodeID, cheking netConf.json file again to verify")
-		for _, node := range networkNodes {
-			if node.ID == nodeID {
-				fmt.Println("Found a corresponding network Node in netConf.json. Trying to connect...")
-				rAddr, err := net.ResolveTCPAddr("tcp", node.IP+":"+strconv.Itoa(node.Port)) //ResolveTCPAddr func(network, address string) (*TCPAddr, error))
-				if err != nil {
-					log.Print(err)
+	if timeout != false {
+		//Check if we got a active connection for given nodeID
+		if _, ok := connTable[nodeID]; ok {
+			currentConn = nodeID
+			//fmt.Println("Current Connection is to Node: ", currentConn)
+		} else {
+			fmt.Println("Don't have any active TCP connection for given NodeID, cheking netConf.json file again to verify")
+			for _, node := range networkNodes {
+				if node.ID == nodeID {
+					fmt.Println("Found a corresponding network Node in netConf.json. Trying to connect...")
+					rAddr, err := net.ResolveTCPAddr("tcp", node.IP+":"+strconv.Itoa(node.Port)) //ResolveTCPAddr func(network, address string) (*TCPAddr, error))
+					if err != nil {
+						log.Print(err)
+					}
+					TCPconn, err := net.DialTCP("tcp", nil, rAddr) //func(network string, laddr *net.TCPAddr, raddr *net.TCPAddr) (*net.TCPConn, error)
+					if err != nil {
+						log.Print(err)
+						fmt.Println("Unable to connect to network node...")
+						continue
+					}
+					connTable[node.ID] = TCPconn
+					fmt.Println(connTable)
+					currentConn = node.ID
 				}
-				TCPconn, err := net.DialTCP("tcp", nil, rAddr) //func(network string, laddr *net.TCPAddr, raddr *net.TCPAddr) (*net.TCPConn, error)
-				if err != nil {
-					log.Print(err)
-					fmt.Println("Unable to connect to network node...")
-					continue
-				}
-				connTable[node.ID] = TCPconn
-				fmt.Println(connTable)
-				currentConn = node.ID
 			}
 		}
+	} else if timeout {
+		testID := currentConn - 1
+		if testID < 0 {
+			currentConn = len(networkNodes) - 1
+		}
+		currentConn = testID
 	}
+
 	//fmt.Println("Failed to find or connect to a network node with the given nodeID: ", nodeID)
 	if cSeq == reqSeq {
-		fmt.Println("Reconnected to new node - Resending message")
+		fmt.Printf("Reconnected to new node %d - Resending message", currentConn)
 		syncTxRx(val)
 	}
 

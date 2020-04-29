@@ -79,7 +79,7 @@ func (ch *ClientHandler) DeliverResponse(res multipaxos.Response) {
 
 //DeliverClientInfo delivers client information from client -> invoked when running ch.GetClientInfo() func
 func (ch *ClientHandler) DeliverClientInfo(cliMsg network.Message) {
-	fmt.Printf("ClienterHandler %d: Got client info: ID = %v\n", ch.id, cliMsg.ClientInfo.ClientID)
+	//fmt.Printf("ClienterHandler %d: Got client info: ID = %v\n", ch.id, cliMsg.ClientInfo.ClientID)
 	clientInfo := cliMsg.ClientInfo
 	if cConn, ok := ch.ClientConnsMap[clientInfo.Addr]; ok {
 		ch.ClientInfoMap[clientInfo.ClientID] = network.ClientInfo{
