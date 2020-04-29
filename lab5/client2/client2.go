@@ -54,7 +54,7 @@ func main() {
 				continue
 			}
 			//fmt.Println(val)
-			fmt.Println("for loop (after inputToValue) seqNum: ", seqNum)
+			//fmt.Println("for loop (after inputToValue) seqNum: ", seqNum)
 			seqCmd[seqNum] = val //Add Command/Value to sequence map
 			//fmt.Println(seqCmd)
 			//status := syncTxRx(msg) //A client should always send requests synchronously, i.e. wait for a response to the previous request before sending a new one
@@ -76,6 +76,7 @@ func main() {
 			case "Getinfo":
 				deliverClientInfo(rMsg, myID, connTable[rMsg.From])
 			case "Value":
+				fmt.Printf("Got value form node %d: ClientSeq = %d and reqSeq = %d\n", rMsg.From, rMsg.Value.ClientSeq, reqSeq)
 				if rMsg.Value.ClientSeq == reqSeq {
 					mu.Lock()
 					responseOK = true
@@ -84,11 +85,12 @@ func main() {
 				} else {
 					responseBuffer[rMsg.Value.ClientSeq] = rMsg
 				}
+				//handleIncValue(rMsg)
 			}
 		case sMsg := <-SendChan:
 			switch sMsg.Type {
 			case "Value":
-				fmt.Printf("Client: Sending message to node %d with ClientSeq %d", sMsg.To, sMsg.Value.ClientSeq)
+				fmt.Printf("Client: Sending message to node %d with ClientSeq %d\n", sMsg.To, sMsg.Value.ClientSeq)
 				err := sendMessage(currentConn, sMsg)
 				if err != nil {
 					log.Print(err)
@@ -123,7 +125,7 @@ func inputToValue(input string, id string) (val multipaxos.Value, err error) {
 		accountNum, _ := strconv.Atoi(accountStr)
 		if commands[0] == "balance" {
 			seqNum++
-			fmt.Println("inputToValue seqNum: ", seqNum)
+			//fmt.Println("inputToValue seqNum: ", seqNum)
 			return multipaxos.Value{
 				ClientID:   id,
 				ClientSeq:  seqNum,
@@ -144,7 +146,7 @@ func inputToValue(input string, id string) (val multipaxos.Value, err error) {
 		accountNum, _ := strconv.Atoi(accountStr)
 		if commands[0] == "deposit" || commands[0] == "withdraw" {
 			seqNum++
-			fmt.Println("inputToValue seqNum: ", seqNum)
+			//fmt.Println("inputToValue seqNum: ", seqNum)
 			op := 1 //default is deposit = 1
 			if commands[0] == "withdraw" {
 				op = 2
@@ -179,7 +181,7 @@ func syncTxRx(val multipaxos.Value) {
 	defer mu.Unlock()
 	responseOK = false
 	reqSeq = val.ClientSeq
-	fmt.Println("syncTxRx  reSeq = seqNum: ", reqSeq, seqNum)
+	//fmt.Println("syncTxRx  reSeq = seqNum: ", reqSeq, seqNum)
 	msg := network.Message{
 		To:    currentConn,
 		Type:  "Value",
@@ -214,7 +216,7 @@ func connectToNodes(nodes []network.Node) {
 }
 
 func reconnect(rMsg network.Message, val multipaxos.Value) {
-	fmt.Printf(" Received value seq: \t%d\n Expected value seq: \t%d\n Current Conn: \t\t%d\n New Conn: \t\t%d\n", rMsg.Value.ClientSeq, reqSeq, currentConn, rMsg.RedirectNode)
+	//fmt.Printf(" Received value seq: \t%d\n Expected value seq: \t%d\n Current Conn: \t\t%d\n New Conn: \t\t%d\n", rMsg.Value.ClientSeq, reqSeq, currentConn, rMsg.RedirectNode)
 	nodeID := rMsg.RedirectNode
 	cSeq := rMsg.Value.ClientSeq
 
@@ -334,4 +336,8 @@ func listenOnConn(TCPconn *net.TCPConn, rChan chan network.Message) {
 		}
 		rChan <- *message
 	}
+}
+
+func handleIncValue(rMsg network.Message) {
+
 }

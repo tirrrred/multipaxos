@@ -51,7 +51,7 @@ func (ch *ClientHandler) Start() {
 				ch.ClientConnsMap[cConn.RemoteAddr().String()] = cConn
 				ch.GetClientInfo(cConn)
 			case cliVal := <-ch.ClientValueChanIn:
-				fmt.Printf("Got clientValue with ClientSeq %d", cliVal.ClientSeq)
+				fmt.Printf("Got clientValue with ClientSeq %d\n", cliVal.ClientSeq)
 				if ch.id != ch.leader { //If this node is not the leader node
 					ch.Redirect(cliVal)
 				}
