@@ -59,6 +59,7 @@ type Message struct {
 	Prepare      multipaxos.Prepare
 	Learn        multipaxos.Learn
 	Value        multipaxos.Value
+	Response     multipaxos.Response
 }
 
 //ClientInfo is used to get ClientID from given TCPconn
@@ -99,7 +100,6 @@ func InitNetwork(nodes []Node, myself int) (network Network, err error) {
 				Port:    node.Port,
 				TCPaddr: addr,
 			})
-
 		}
 	}
 	return network, err

@@ -17,6 +17,7 @@ type ClientHandler struct {
 	ClientConnsMap    map[string]*net.TCPConn
 	ClientValueChanIn chan multipaxos.Value
 	LearnValueChan    chan multipaxos.Value
+	responseChanIn    chan multipaxos.Response
 	ClientConnChan    chan *net.TCPConn
 	ClientConnsSlice  []*net.TCPConn
 	ld                detector.LeaderDetector
@@ -31,6 +32,7 @@ func NewClientHandler(id int, proposer *multipaxos.Proposer, ld detector.LeaderD
 		proposer:          proposer,
 		ClientValueChanIn: make(chan multipaxos.Value, 3000),
 		LearnValueChan:    make(chan multipaxos.Value, 3000),
+		responseChanIn:    make(chan multipaxos.Response, 3000),
 		ld:                ld,
 		leader:            ld.Leader(),
 		ClientConnChan:    clConnChan,
@@ -56,6 +58,8 @@ func (ch *ClientHandler) Start() {
 					ch.Redirect(cliVal)
 				}
 				ch.proposer.DeliverClientValue(cliVal)
+			case response := <-ch.responseChanIn:
+				ch.SendResToCli(response)
 			case newLeader := <-ldCHG:
 				ch.leader = newLeader
 			}
@@ -69,9 +73,9 @@ func (ch *ClientHandler) DeliverClientValue(val multipaxos.Value) {
 }
 
 //DeliverResponse send resplonse based on clienter handler algorithm
-//func (ch *ClientHandler) DeliverResponse(res multipaxos.Response) {
-//	ch.responseChanIn <- res
-//}
+func (ch *ClientHandler) DeliverResponse(res multipaxos.Response) {
+	ch.responseChanIn <- res
+}
 
 //DeliverClientInfo delivers client information from client -> invoked when running ch.GetClientInfo() func
 func (ch *ClientHandler) DeliverClientInfo(cliMsg network.Message) {
@@ -129,22 +133,23 @@ func (ch *ClientHandler) Redirect(val multipaxos.Value) {
 }
 
 //SendValToCli sends decidedValueToClient
-func (ch *ClientHandler) SendValToCli(dVal multipaxos.DecidedValue) {
-	if cliInfo, ok := ch.ClientInfoMap[dVal.Value.ClientID]; ok {
+func (ch *ClientHandler) SendResToCli(res multipaxos.Response) {
+
+	if cliInfo, ok := ch.ClientInfoMap[res.ClientID]; ok {
 		cConn := cliInfo.Conn
-		dMsg := network.Message{
-			Type:         "Value",
+		resMsg := network.Message{
+			Type:         "Response",
 			From:         ch.id,
 			RedirectNode: ch.leader,
-			Value:        dVal.Value,
+			Response:     res,
 		}
 		//fmt.Println("ClientHandler: Redirect client. ClientSeq = ", val.ClientSeq)
-		messageByte, err := json.Marshal(dMsg)
+		messageByte, err := json.Marshal(resMsg)
 		if err != nil {
 			log.Print("ClientHandler - Redirect: json.Marshal: ", err)
 		}
 		//fmt.Printf("cConn: %v, RemoteAddr: %s", cConn, cConn.RemoteAddr().String)
-		fmt.Printf("Sending value to client: From: %d, To: %s, ClientSeq: %d", ch.id, cliInfo.Addr, dVal.Value.ClientSeq)
+		fmt.Printf("Sending Response to client: From: %d, To: %s, ClientSeq: %d", ch.id, cliInfo.Addr, res.ClientSeq)
 		_, err = cConn.Write(messageByte)
 		if err != nil {
 			log.Print("ClientHandler - Redirect: cConn.Write: ", err)

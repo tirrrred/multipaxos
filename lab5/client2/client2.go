@@ -75,9 +75,9 @@ func main() {
 				reconnect(rMsg, seqCmd[rMsg.Value.ClientSeq])
 			case "Getinfo":
 				deliverClientInfo(rMsg, myID, connTable[rMsg.From])
-			case "Value":
+			case "Response":
 				//fmt.Printf("Got value form node %d: ClientSeq = %d and reqSeq = %d\n", rMsg.From, rMsg.Value.ClientSeq, reqSeq)
-				if rMsg.Value.ClientSeq == reqSeq {
+				if rMsg.Response.ClientSeq == reqSeq {
 					mu.Lock()
 					responseOK = true
 					mu.Unlock()

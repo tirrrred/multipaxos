@@ -5,6 +5,7 @@ import (
 	"dat520/lab3/detector"
 	"dat520/lab3/network"
 
+	"dat520/lab5/bankhandler"
 	"dat520/lab5/clienthandler2"
 	"dat520/lab5/multipaxos"
 	"encoding/json"
@@ -83,6 +84,10 @@ func main() {
 	clihandler := clienthandler2.NewClientHandler(appnet.Myself.ID, proposer, ld, cliConnChan)
 	clihandler.Start()
 
+	//Implement Bank Handler:
+	responseOutChan := make(chan multipaxos.Response, 3000)
+	bankhandler := bankhandler.NewBankHandler(responseOutChan)
+
 	//done channel to receive os signal (like ctrl+c). Should close TCP connections correctly
 	done := make(chan os.Signal)
 	signal.Notify(done, os.Interrupt)
@@ -144,8 +149,8 @@ func main() {
 			appnet.SendMsgTo(lrnMsg, netconf.Learners)
 		case decidedValue := <-decidedOutChan:
 			fmt.Printf("Main: (Learner) %d sent decided value to client\n", appnet.Myself.ID)
-			clihandler.SendValToCli(decidedValue)
-			handleDecidedValue(decidedValue)
+			//clihandler.SendValToCli(decidedValue)
+			bankhandler.HandleDecidedValue(decidedValue)
 		case rMsg := <-appnet.ReceiveChan:
 			switch {
 			case rMsg.Type == "Heartbeat":
