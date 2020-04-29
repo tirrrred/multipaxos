@@ -144,6 +144,7 @@ func (ch *ClientHandler) SendValToCli(dVal multipaxos.DecidedValue) {
 			log.Print("ClientHandler - Redirect: json.Marshal: ", err)
 		}
 		//fmt.Printf("cConn: %v, RemoteAddr: %s", cConn, cConn.RemoteAddr().String)
+		fmt.Printf("Sending value to client: From: %d, To: %s, ClientSeq: %d", ch.id, cliInfo.Addr, dVal.Value.ClientSeq)
 		_, err = cConn.Write(messageByte)
 		if err != nil {
 			log.Print("ClientHandler - Redirect: cConn.Write: ", err)
