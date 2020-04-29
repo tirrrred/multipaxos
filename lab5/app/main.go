@@ -181,6 +181,9 @@ func main() {
 			case rMsg.Type == "ClientInfo":
 				fmt.Printf("\nMain: (Clienthandler) %d got client info from %v\n", appnet.Myself.ID, rMsg.ClientInfo.ClientID)
 				clihandler.DeliverClientInfo(rMsg)
+			case rMsg.Type == "Timeout":
+				fmt.Printf("Main: (ClientHandler) %d got client reconnected due to timeout\n", appnet.Myself.ID)
+				clihandler.DeliverTimeoutMsg(rMsg.Value)
 			}
 		case <-done:
 			proposer.Stop()

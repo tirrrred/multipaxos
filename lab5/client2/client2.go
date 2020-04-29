@@ -106,7 +106,7 @@ func main() {
 			reVal := seqCmd[reqSeq]
 			reMsg := network.Message{
 				To:    currentConn,
-				Type:  "Value",
+				Type:  "Timeout",
 				Value: reVal,
 			}
 			reconnect(reMsg, reVal, true)
@@ -270,7 +270,7 @@ func reconnect(rMsg network.Message, val multipaxos.Value, timeout bool) {
 
 	//fmt.Println("Failed to find or connect to a network node with the given nodeID: ", nodeID)
 	if cSeq == reqSeq {
-		fmt.Printf("Reconnected to new node %d - Resending message", currentConn)
+		fmt.Printf("Reconnected to new node %d - Resending message\n", currentConn)
 		syncTxRx(val)
 	}
 

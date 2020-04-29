@@ -12,33 +12,35 @@ import (
 
 //ClientHandler struct for necessary fields
 type ClientHandler struct {
-	id                int                  //ID of the node running the clienthandler
-	proposer          *multipaxos.Proposer //
-	ClientConnsMap    map[string]*net.TCPConn
-	ClientValueChanIn chan multipaxos.Value
-	LearnValueChan    chan multipaxos.Value
-	responseChanIn    chan multipaxos.Response
-	ClientConnChan    chan *net.TCPConn
-	ClientConnsSlice  []*net.TCPConn
-	ld                detector.LeaderDetector
-	leader            int
-	ClientInfoMap     map[string]network.ClientInfo
+	id                  int                  //ID of the node running the clienthandler
+	proposer            *multipaxos.Proposer //
+	ClientConnsMap      map[string]*net.TCPConn
+	ClientValueChanIn   chan multipaxos.Value
+	ClientTimeoutChanIn chan multipaxos.Value
+	LearnValueChan      chan multipaxos.Value
+	responseChanIn      chan multipaxos.Response
+	ClientConnChan      chan *net.TCPConn
+	ClientConnsSlice    []*net.TCPConn
+	ld                  detector.LeaderDetector
+	leader              int
+	ClientInfoMap       map[string]network.ClientInfo
 }
 
 //NewClientHandler creates a new ClientHandler
 func NewClientHandler(id int, proposer *multipaxos.Proposer, ld detector.LeaderDetector, clConnChan chan *net.TCPConn) *ClientHandler {
 	return &ClientHandler{
-		id:                id,
-		proposer:          proposer,
-		ClientValueChanIn: make(chan multipaxos.Value, 3000),
-		LearnValueChan:    make(chan multipaxos.Value, 3000),
-		responseChanIn:    make(chan multipaxos.Response, 3000),
-		ld:                ld,
-		leader:            ld.Leader(),
-		ClientConnChan:    clConnChan,
-		ClientConnsSlice:  []*net.TCPConn{},
-		ClientConnsMap:    make(map[string]*net.TCPConn),
-		ClientInfoMap:     make(map[string]network.ClientInfo),
+		id:                  id,
+		proposer:            proposer,
+		ClientValueChanIn:   make(chan multipaxos.Value, 3000),
+		ClientTimeoutChanIn: make(chan multipaxos.Value, 3000),
+		LearnValueChan:      make(chan multipaxos.Value, 3000),
+		responseChanIn:      make(chan multipaxos.Response, 3000),
+		ld:                  ld,
+		leader:              ld.Leader(),
+		ClientConnChan:      clConnChan,
+		ClientConnsSlice:    []*net.TCPConn{},
+		ClientConnsMap:      make(map[string]*net.TCPConn),
+		ClientInfoMap:       make(map[string]network.ClientInfo),
 	}
 }
 
@@ -58,6 +60,8 @@ func (ch *ClientHandler) Start() {
 					ch.Redirect(cliVal)
 				}
 				ch.proposer.DeliverClientValue(cliVal)
+			case cliTimeVal := <-ch.ClientTimeoutChanIn:
+				ch.proposer.DeliverClientValue(cliTimeVal)
 			case response := <-ch.responseChanIn:
 				ch.SendResToCli(response)
 			case newLeader := <-ldCHG:
@@ -75,6 +79,11 @@ func (ch *ClientHandler) DeliverClientValue(val multipaxos.Value) {
 //DeliverResponse send resplonse based on clienter handler algorithm
 func (ch *ClientHandler) DeliverResponse(res multipaxos.Response) {
 	ch.responseChanIn <- res
+}
+
+//DeliverTimeoutMsg delivers a clients reconnect attempt due to timeout to correct handler
+func (ch *ClientHandler) DeliverTimeoutMsg(timeVal multipaxos.Value) {
+	ch.ClientTimeoutChanIn <- timeVal
 }
 
 //DeliverClientInfo delivers client information from client -> invoked when running ch.GetClientInfo() func
