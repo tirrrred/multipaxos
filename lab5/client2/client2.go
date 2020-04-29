@@ -76,12 +76,12 @@ func main() {
 			case "Getinfo":
 				deliverClientInfo(rMsg, myID, connTable[rMsg.From])
 			case "Value":
-				fmt.Printf("Got value form node %d: ClientSeq = %d and reqSeq = %d\n", rMsg.From, rMsg.Value.ClientSeq, reqSeq)
+				//fmt.Printf("Got value form node %d: ClientSeq = %d and reqSeq = %d\n", rMsg.From, rMsg.Value.ClientSeq, reqSeq)
 				if rMsg.Value.ClientSeq == reqSeq {
 					mu.Lock()
 					responseOK = true
 					mu.Unlock()
-					fmt.Printf("Client: Got response for SeqNum %d: Result: %+v\n", rMsg.Value.ClientSeq, rMsg.Value.Txn)
+					fmt.Printf("Client: Got response from %d for SeqNum %d: Result: %+v\n", rMsg.From, rMsg.Value.ClientSeq, rMsg.Value.Txn)
 				} else {
 					responseBuffer[rMsg.Value.ClientSeq] = rMsg
 				}

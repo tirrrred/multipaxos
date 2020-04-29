@@ -145,6 +145,7 @@ func main() {
 		case decidedValue := <-decidedOutChan:
 			fmt.Printf("Main: (Learner) %d sent decided value to client\n", appnet.Myself.ID)
 			clihandler.SendValToCli(decidedValue)
+			handleDecidedValue(decidedValue)
 		case rMsg := <-appnet.ReceiveChan:
 			switch {
 			case rMsg.Type == "Heartbeat":
