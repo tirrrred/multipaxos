@@ -57,8 +57,8 @@ func main() {
 			seqCmd[seqNum] = val //Add Command/Value to sequence map
 			//fmt.Println(seqCmd)
 			//status := syncTxRx(msg) //A client should always send requests synchronously, i.e. wait for a response to the previous request before sending a new one
-			fmt.Println("networkNodes[]: ", networkNodes)
-			fmt.Println("connTable map[int]TCPconn: ", connTable)
+			//fmt.Println("networkNodes[]: ", networkNodes)
+			//fmt.Println("connTable map[int]TCPconn: ", connTable)
 			if responseOK {
 				syncTxRx(seqCmd[reqSeq+1])
 			}
@@ -70,8 +70,8 @@ func main() {
 		case rMsg := <-ReceiveChan:
 			switch rMsg.Type {
 			case "Redirect":
-				fmt.Println("Client: Redirected to node " + strconv.Itoa(1))
-				reconnect(rMsg.RedirectNode)
+				fmt.Println("Client: Redirected to node " + strconv.Itoa(rMsg.RedirectNode))
+				reconnect(rMsg, seqCmd[rMsg.Value.ClientSeq])
 			case "Getinfo":
 				deliverClientInfo(rMsg, myID, connTable[rMsg.From])
 			case "Value":
@@ -209,7 +209,10 @@ func connectToNodes(nodes []network.Node) {
 	currentConn = nodes[0].ID //Starts to use node 0 as a starting point for sending values
 }
 
-func reconnect(nodeID int) {
+func reconnect(rMsg network.Message, val multipaxos.Value) {
+	nodeID := rMsg.RedirectNode
+	cSeq := rMsg.Value.ClientSeq
+
 	//Check if we got a active connection for given nodeID
 	if _, ok := connTable[nodeID]; ok {
 		currentConn = nodeID
@@ -236,6 +239,9 @@ func reconnect(nodeID int) {
 		}
 	}
 	fmt.Println("Failed to find or connect to a network node with the given nodeID: ", nodeID)
+	if cSeq == reqSeq {
+		syncTxRx(val)
+	}
 }
 
 func sendMessage(nodeID int, message network.Message) error {
