@@ -216,29 +216,28 @@ func reconnect(rMsg network.Message, val multipaxos.Value) {
 	//Check if we got a active connection for given nodeID
 	if _, ok := connTable[nodeID]; ok {
 		currentConn = nodeID
-		return
-	}
-	fmt.Println("Don't have any active TCP connection for given NodeID, cheking netConf.json file again to verify")
-	for _, node := range networkNodes {
-		if node.ID == nodeID {
-			fmt.Println("Found a corresponding network Node in netConf.json. Trying to connect...")
-			rAddr, err := net.ResolveTCPAddr("tcp", node.IP+":"+strconv.Itoa(node.Port)) //ResolveTCPAddr func(network, address string) (*TCPAddr, error))
-			if err != nil {
-				log.Print(err)
+	} else {
+		fmt.Println("Don't have any active TCP connection for given NodeID, cheking netConf.json file again to verify")
+		for _, node := range networkNodes {
+			if node.ID == nodeID {
+				fmt.Println("Found a corresponding network Node in netConf.json. Trying to connect...")
+				rAddr, err := net.ResolveTCPAddr("tcp", node.IP+":"+strconv.Itoa(node.Port)) //ResolveTCPAddr func(network, address string) (*TCPAddr, error))
+				if err != nil {
+					log.Print(err)
+				}
+				TCPconn, err := net.DialTCP("tcp", nil, rAddr) //func(network string, laddr *net.TCPAddr, raddr *net.TCPAddr) (*net.TCPConn, error)
+				if err != nil {
+					log.Print(err)
+					fmt.Println("Unable to connect to network node...")
+					continue
+				}
+				connTable[node.ID] = TCPconn
+				fmt.Println(connTable)
+				currentConn = node.ID
 			}
-			TCPconn, err := net.DialTCP("tcp", nil, rAddr) //func(network string, laddr *net.TCPAddr, raddr *net.TCPAddr) (*net.TCPConn, error)
-			if err != nil {
-				log.Print(err)
-				fmt.Println("Unable to connect to network node...")
-				continue
-			}
-			connTable[node.ID] = TCPconn
-			fmt.Println(connTable)
-			currentConn = node.ID
-			return
 		}
 	}
-	fmt.Println("Failed to find or connect to a network node with the given nodeID: ", nodeID)
+	//fmt.Println("Failed to find or connect to a network node with the given nodeID: ", nodeID)
 	if cSeq == reqSeq {
 		syncTxRx(val)
 	}
@@ -297,7 +296,7 @@ func deliverClientInfo(msg network.Message, id string, conn *net.TCPConn) {
 		To:         msg.From,
 		ClientInfo: cliInfo,
 	}
-	fmt.Println("Sending client Info ", cliMsg)
+	//fmt.Println("Sending client Info ", cliMsg)
 	err := sendMessage(msg.From, cliMsg)
 	if err != nil {
 		log.Print(err)
