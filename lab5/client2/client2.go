@@ -42,7 +42,7 @@ func main() {
 
 	myID := generateID(10)
 
-	responseTimer = time.NewTicker(6 * time.Second)
+	responseTimer = time.NewTicker(10 * time.Second)
 	responseTimer.Stop()
 	//Clients send command loop - Manual mode
 	go func() {
@@ -65,7 +65,7 @@ func main() {
 			//fmt.Println("networkNodes[]: ", networkNodes)
 			//fmt.Println("connTable map[int]TCPconn: ", connTable)
 			if responseOK {
-				syncTxRx(seqCmd[reqSeq+1])
+				syncTxRx(seqCmd[reqSeq+1], "Value")
 			}
 		}
 	}()
@@ -183,7 +183,7 @@ func inputToValue(input string, id string) (val multipaxos.Value, err error) {
 	}
 }
 
-func syncTxRx(val multipaxos.Value) {
+func syncTxRx(val multipaxos.Value, msgType string) {
 	//Send message (request) to correct connection (currentConn)
 	//Wait for reply (reponse) from connection
 	// 1) If correct -> proceed with next command
@@ -266,12 +266,18 @@ func reconnect(rMsg network.Message, val multipaxos.Value, timeout bool) {
 			currentConn = len(networkNodes) - 1
 		}
 		currentConn = testID
+		if cSeq == reqSeq {
+			fmt.Printf("Reconnected to new node %d - Resending message\n", currentConn)
+			syncTxRx(val, "Timeout")
+			return
+		}
 	}
 
 	//fmt.Println("Failed to find or connect to a network node with the given nodeID: ", nodeID)
 	if cSeq == reqSeq {
 		fmt.Printf("Reconnected to new node %d - Resending message\n", currentConn)
-		syncTxRx(val)
+		syncTxRx(val, "Value")
+		return
 	}
 
 }
