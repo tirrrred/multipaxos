@@ -81,7 +81,7 @@ func main() {
 					mu.Lock()
 					responseOK = true
 					mu.Unlock()
-					fmt.Printf("Client: Got response from %d for SeqNum %d: Result: %+v\n", rMsg.From, rMsg.Value.ClientSeq, rMsg.Value.Txn)
+					fmt.Printf("Client: Got response from %d: \nAccount %d = %d\n", rMsg.From, rMsg.Response.TxnRes.AccountNum, rMsg.Response.TxnRes.Balance)
 				} else {
 					responseBuffer[rMsg.Value.ClientSeq] = rMsg
 				}
@@ -90,7 +90,7 @@ func main() {
 		case sMsg := <-SendChan:
 			switch sMsg.Type {
 			case "Value":
-				fmt.Printf("Client: Sending message to node %d with ClientSeq %d\n", sMsg.To, sMsg.Value.ClientSeq)
+				fmt.Printf("Client: Sending transaction to node %d: \nAccount %d %v %d\n", sMsg.To, sMsg.Value.Txn.Amount, sMsg.Value.Txn.Op, sMsg.Value.Txn.Amount)
 				err := sendMessage(currentConn, sMsg)
 				if err != nil {
 					log.Print(err)
