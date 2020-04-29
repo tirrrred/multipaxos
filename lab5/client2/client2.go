@@ -90,7 +90,7 @@ func main() {
 		case sMsg := <-SendChan:
 			switch sMsg.Type {
 			case "Value":
-				fmt.Printf("Client: Sending transaction to node %d: \nAccount %d %v %d\n", sMsg.To, sMsg.Value.Txn.Amount, sMsg.Value.Txn.Op, sMsg.Value.Txn.Amount)
+				fmt.Printf("Client: Sending transaction to node %d: \nAccount %d %v %d\n", sMsg.To, sMsg.Value.AccountNum, sMsg.Value.Txn.Op, sMsg.Value.Txn.Amount)
 				err := sendMessage(currentConn, sMsg)
 				if err != nil {
 					log.Print(err)
