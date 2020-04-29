@@ -283,7 +283,7 @@ func importNetConf() (network.NetConfig, error) {
 func deliverClientInfo(msg network.Message, id string, conn *net.TCPConn) {
 	cliInfo := network.ClientInfo{
 		ClientID: id,
-		Conn:     conn,
+		Addr:     conn.LocalAddr().String(),
 	}
 
 	cliMsg := network.Message{
