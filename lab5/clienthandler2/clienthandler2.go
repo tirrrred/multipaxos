@@ -113,6 +113,7 @@ func (ch *ClientHandler) Redirect(val multipaxos.Value) {
 		Type:         "Redirect",
 		From:         ch.id,
 		RedirectNode: ch.leader,
+		Value:        val,
 	}
 	messageByte, err := json.Marshal(redirMsg)
 	if err != nil {
