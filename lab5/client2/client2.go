@@ -54,6 +54,7 @@ func main() {
 				continue
 			}
 			//fmt.Println(val)
+			fmt.Println("for loop (after inputToValue) seqNum: ", seqNum)
 			seqCmd[seqNum] = val //Add Command/Value to sequence map
 			//fmt.Println(seqCmd)
 			//status := syncTxRx(msg) //A client should always send requests synchronously, i.e. wait for a response to the previous request before sending a new one
@@ -122,6 +123,7 @@ func inputToValue(input string, id string) (val multipaxos.Value, err error) {
 		accountNum, _ := strconv.Atoi(accountStr)
 		if commands[0] == "balance" {
 			seqNum++
+			fmt.Println("inputToValue seqNum: ", seqNum)
 			return multipaxos.Value{
 				ClientID:   id,
 				ClientSeq:  seqNum,
@@ -142,6 +144,7 @@ func inputToValue(input string, id string) (val multipaxos.Value, err error) {
 		accountNum, _ := strconv.Atoi(accountStr)
 		if commands[0] == "deposit" || commands[0] == "withdraw" {
 			seqNum++
+			fmt.Println("inputToValue seqNum: ", seqNum)
 			op := 1 //default is deposit = 1
 			if commands[0] == "withdraw" {
 				op = 2
@@ -176,6 +179,7 @@ func syncTxRx(val multipaxos.Value) {
 	defer mu.Unlock()
 	responseOK = false
 	reqSeq = val.ClientSeq
+	fmt.Println("syncTxRx  reSeq = seqNum: ", reqSeq, seqNum)
 	msg := network.Message{
 		To:    currentConn,
 		Type:  "Value",
