@@ -21,6 +21,7 @@ type ClientHandler struct {
 	ClientConnsSlice  []*net.TCPConn
 	ld                detector.LeaderDetector
 	leader            int
+	ClientInfoMap     map[string]network.ClientInfo
 }
 
 //NewClientHandler creates a new ClientHandler
@@ -35,6 +36,7 @@ func NewClientHandler(id int, proposer *multipaxos.Proposer, ld detector.LeaderD
 		ClientConnChan:    clConnChan,
 		ClientConnsSlice:  []*net.TCPConn{},
 		ClientConnsMap:    make(map[string]*net.TCPConn),
+		ClientInfoMap:     make(map[string]network.ClientInfo),
 	}
 }
 
@@ -46,6 +48,7 @@ func (ch *ClientHandler) Start() {
 			select {
 			case cConn := <-ch.ClientConnChan:
 				ch.ClientConnsSlice = append(ch.ClientConnsSlice, cConn)
+				ch.ClientConnsMap[cConn.RemoteAddr().String()] = cConn
 				ch.GetClientInfo(cConn)
 			case cliVal := <-ch.ClientValueChanIn:
 				if ch.id != ch.leader { //If this node is not the leader node
@@ -73,11 +76,20 @@ func (ch *ClientHandler) DeliverClientValue(val multipaxos.Value) {
 func (ch *ClientHandler) DeliverClientInfo(cliMsg network.Message) {
 	fmt.Printf("ClienterHandler %d: Got client info: ID = %v, Conn = %v", ch.id, cliMsg.ClientInfo.ClientID, cliMsg.ClientInfo.Conn)
 	clientInfo := cliMsg.ClientInfo
-	ch.ClientConnsMap[clientInfo.ClientID] = clientInfo.Conn
+	if cConn, ok := ch.ClientConnsMap[clientInfo.Addr]; ok {
+		ch.ClientInfoMap[clientInfo.ClientID] = network.ClientInfo{
+			ClientID: clientInfo.ClientID,
+			Addr:     clientInfo.Addr,
+			Conn:     cConn,
+		}
+	} else {
+		fmt.Println("ClienterHandler: Err - Don't have any connection stored for that socket addr!")
+	}
 }
 
 //GetClientInfo is sent to clients to get ClientID and information to be stored and uses later
 func (ch *ClientHandler) GetClientInfo(cConn *net.TCPConn) {
+
 	message := network.Message{
 		Type: "Getinfo",
 		From: ch.id,
@@ -94,7 +106,8 @@ func (ch *ClientHandler) GetClientInfo(cConn *net.TCPConn) {
 
 //Redirect : if Clients tryies to send value to a node that's not the leader, it should be redirected to the networks/clusters leader ID
 func (ch *ClientHandler) Redirect(val multipaxos.Value) {
-	cConn := ch.ClientConnsMap[val.ClientID]
+
+	cConn := ch.ClientInfoMap[val.ClientID].Conn
 
 	redirMsg := network.Message{
 		Type:         "Redirect",

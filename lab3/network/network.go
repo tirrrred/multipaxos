@@ -65,6 +65,7 @@ type Message struct {
 type ClientInfo struct {
 	ClientID string
 	Conn     *net.TCPConn
+	Addr     string
 }
 
 var mutex = &sync.Mutex{}
