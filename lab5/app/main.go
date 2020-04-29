@@ -148,9 +148,12 @@ func main() {
 			fmt.Printf("Main: (Acceptor) %d sent learn to learners %v: %v\n", appnet.Myself.ID, netconf.Learners, lrn)
 			appnet.SendMsgTo(lrnMsg, netconf.Learners)
 		case decidedValue := <-decidedOutChan:
-			fmt.Printf("Main: (Learner) %d sent decided value to client\n", appnet.Myself.ID)
+			fmt.Printf("Main: (Learner) %d sent decided value to bank handler\n", appnet.Myself.ID)
 			//clihandler.SendValToCli(decidedValue)
 			bankhandler.HandleDecidedValue(decidedValue)
+		case response := <-responseOutChan:
+			fmt.Printf("Main: (BankHandler) %d sent response to client handler\n", appnet.Myself.ID)
+			clihandler.DeliverResponse(response)
 		case rMsg := <-appnet.ReceiveChan:
 			switch {
 			case rMsg.Type == "Heartbeat":

@@ -40,9 +40,9 @@ func (bh *BankHandler) DeliverMoreWhat() {
 
 //HandleDecidedValue from learner
 func (bh *BankHandler) HandleDecidedValue(dVal multipaxos.DecidedValue) {
-	fmt.Printf("Main: handleDecidedValue %v", dVal)
+	fmt.Printf("BankHandler: handleDecidedValue %v\n", dVal)
 	if int(dVal.SlotID) <= bh.adu {
-		fmt.Printf("Main: handleDecidedValue - SlotID (%d) is smaller than 'All Decided Upto' (adu = %d)", int(dVal.SlotID), bh.adu)
+		fmt.Printf("BankHandler: handleDecidedValue - SlotID (%d) is smaller than 'All Decided Upto' (adu = %d)\n", int(dVal.SlotID), bh.adu)
 		return
 	}
 	if int(dVal.SlotID) > bh.adu+1 {
