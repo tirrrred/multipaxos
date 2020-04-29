@@ -3,6 +3,7 @@
 package multipaxos
 
 import (
+	"fmt"
 	"sort"
 )
 
@@ -113,6 +114,7 @@ func (a *Acceptor) handlePrepare(prp Prepare) (prm Promise, output bool) {
 func (a *Acceptor) handleAccept(acc Accept) (lrn Learn, output bool) {
 	// TODO(student)
 	//type PromiseSlot struct{ID SlotID; Vrnd Round; Vval Value}
+	fmt.Printf("Accept rnd = %v, acceptors rnd = %v", acc.Rnd, a.rnd)
 	if acc.Rnd >= a.rnd {
 		a.rnd = acc.Rnd
 		for i, slot := range a.accSlots {

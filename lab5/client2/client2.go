@@ -223,7 +223,7 @@ func reconnect(rMsg network.Message, val multipaxos.Value) {
 	//Check if we got a active connection for given nodeID
 	if _, ok := connTable[nodeID]; ok {
 		currentConn = nodeID
-		fmt.Println("Current Connection is to Node: ", currentConn)
+		//fmt.Println("Current Connection is to Node: ", currentConn)
 	} else {
 		fmt.Println("Don't have any active TCP connection for given NodeID, cheking netConf.json file again to verify")
 		for _, node := range networkNodes {
@@ -261,7 +261,7 @@ func sendMessage(nodeID int, message network.Message) error {
 	}
 	if conn, ok := connTable[nodeID]; ok {
 		bytes, err := conn.Write(messageByte)
-		fmt.Println("Client: Sends message of size (bytes): ", bytes)
+		//fmt.Println("Client: Sends message of size (bytes): ", bytes)
 		if err != nil {
 			log.Print(err)
 			return err
