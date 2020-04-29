@@ -130,7 +130,8 @@ func (ch *ClientHandler) Redirect(val multipaxos.Value) {
 
 //SendValToCli sends decidedValueToClient
 func (ch *ClientHandler) SendValToCli(dVal multipaxos.DecidedValue) {
-	if cConn, ok := ch.ClientInfoMap[dVal.Value.ClientID].Conn; ok {
+	if cliInfo, ok := ch.ClientInfoMap[dVal.Value.ClientID]; ok {
+		cConn := cliInfo.Conn
 		dMsg := network.Message{
 			Type:         "Value",
 			From:         ch.id,
@@ -138,7 +139,7 @@ func (ch *ClientHandler) SendValToCli(dVal multipaxos.DecidedValue) {
 			Value:        dVal.Value,
 		}
 		//fmt.Println("ClientHandler: Redirect client. ClientSeq = ", val.ClientSeq)
-		messageByte, err := json.Marshal(redirMsg)
+		messageByte, err := json.Marshal(dMsg)
 		if err != nil {
 			log.Print("ClientHandler - Redirect: json.Marshal: ", err)
 		}
