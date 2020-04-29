@@ -86,7 +86,7 @@ func main() {
 
 	//Implement Bank Handler:
 	responseOutChan := make(chan multipaxos.Response, 3000)
-	bankhandler := bankhandler.NewBankHandler(responseOutChan)
+	bankhandler := bankhandler.NewBankHandler(responseOutChan, proposer)
 
 	//done channel to receive os signal (like ctrl+c). Should close TCP connections correctly
 	done := make(chan os.Signal)

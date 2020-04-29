@@ -12,15 +12,17 @@ type BankHandler struct {
 	bufferDecidedValue []multipaxos.DecidedValue
 	bankAccounts       map[int]bank.Account
 	responseChanOut    chan<- multipaxos.Response
+	proposer           *multipaxos.Proposer
 }
 
 //NewBankHandler inits a new bankHandler
-func NewBankHandler(responseChan chan<- multipaxos.Response) *BankHandler {
+func NewBankHandler(responseChan chan<- multipaxos.Response, proposer *multipaxos.Proposer) *BankHandler {
 	return &BankHandler{
 		adu:                -1,
 		bufferDecidedValue: []multipaxos.DecidedValue{},
 		bankAccounts:       map[int]bank.Account{},
 		responseChanOut:    responseChan,
+		proposer:           proposer,
 	}
 }
 
@@ -37,10 +39,10 @@ func (bh *BankHandler) DeliverMoreWhat() {
 }
 
 //HandleDecidedValue from learner
-func (bh *BankHandler) HandleDecidedValue(dVal multipaxos.DecidedValue, adu int) {
+func (bh *BankHandler) HandleDecidedValue(dVal multipaxos.DecidedValue) {
 	fmt.Printf("Main: handleDecidedValue %v", dVal)
 	if int(dVal.SlotID) <= bh.adu {
-		fmt.Printf("Main: handleDecidedValue - SlotID (%d) is smaller than 'All Decided Upto' (adu = %d)", int(dVal.SlotID), adu)
+		fmt.Printf("Main: handleDecidedValue - SlotID (%d) is smaller than 'All Decided Upto' (adu = %d)", int(dVal.SlotID), bh.adu)
 		return
 	}
 	if int(dVal.SlotID) > bh.adu+1 {
@@ -65,7 +67,13 @@ func (bh *BankHandler) HandleDecidedValue(dVal multipaxos.DecidedValue, adu int)
 		bh.responseChanOut <- response
 	}
 	bh.adu++
-	//bh.p
+	bh.proposer.IncrementAllDecidedUpTo()
+	for i, buffdecidedVal := range bh.bufferDecidedValue {
+		if int(buffdecidedVal.SlotID) == bh.adu+1 {
+			bh.bufferDecidedValue = append(bh.bufferDecidedValue[:i], bh.bufferDecidedValue[i+1:]...)
+			bh.HandleDecidedValue(buffdecidedVal)
+		}
+	}
 }
 
 //TestBankHandler testing bankhandler for some dVals
