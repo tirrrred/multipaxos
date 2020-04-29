@@ -88,7 +88,7 @@ func main() {
 		case sMsg := <-SendChan:
 			switch sMsg.Type {
 			case "Value":
-				fmt.Println("Client: Sending message to node ", sMsg.To)
+				fmt.Printf("Client: Sending message to node %d with ClientSeq %d", sMsg.To, sMsg.Value.ClientSeq)
 				err := sendMessage(currentConn, sMsg)
 				if err != nil {
 					log.Print(err)

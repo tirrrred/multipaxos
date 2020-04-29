@@ -51,6 +51,7 @@ func (ch *ClientHandler) Start() {
 				ch.ClientConnsMap[cConn.RemoteAddr().String()] = cConn
 				ch.GetClientInfo(cConn)
 			case cliVal := <-ch.ClientValueChanIn:
+				fmt.Printf("Got clientValue with ClientSeq %d", cliVal.ClientSeq)
 				if ch.id != ch.leader { //If this node is not the leader node
 					ch.Redirect(cliVal)
 				}
@@ -115,6 +116,7 @@ func (ch *ClientHandler) Redirect(val multipaxos.Value) {
 		RedirectNode: ch.leader,
 		Value:        val,
 	}
+	fmt.Println("ClientHandler: Redirect client. ClientSeq = ", val.ClientSeq)
 	messageByte, err := json.Marshal(redirMsg)
 	if err != nil {
 		log.Print("ClientHandler - Redirect: json.Marshal: ", err)
