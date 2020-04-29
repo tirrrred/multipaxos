@@ -210,12 +210,14 @@ func connectToNodes(nodes []network.Node) {
 }
 
 func reconnect(rMsg network.Message, val multipaxos.Value) {
+	fmt.Printf(" Received value seq: \t%d\n Expected value seq: \t%d\n Current Conn: \t\t%d\n New Conn: \t\t%d\n", rMsg.Value.ClientSeq, reqSeq, currentConn, rMsg.RedirectNode)
 	nodeID := rMsg.RedirectNode
 	cSeq := rMsg.Value.ClientSeq
 
 	//Check if we got a active connection for given nodeID
 	if _, ok := connTable[nodeID]; ok {
 		currentConn = nodeID
+		fmt.Println("Current Connection is to Node: ", currentConn)
 	} else {
 		fmt.Println("Don't have any active TCP connection for given NodeID, cheking netConf.json file again to verify")
 		for _, node := range networkNodes {
@@ -239,8 +241,10 @@ func reconnect(rMsg network.Message, val multipaxos.Value) {
 	}
 	//fmt.Println("Failed to find or connect to a network node with the given nodeID: ", nodeID)
 	if cSeq == reqSeq {
+		fmt.Println("Reconnected to new node - Resending message")
 		syncTxRx(val)
 	}
+
 }
 
 func sendMessage(nodeID int, message network.Message) error {
