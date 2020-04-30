@@ -202,7 +202,7 @@ func syncTxRx(val multipaxos.Value, msgType string) {
 		Value: val,
 	}
 	SendChan <- msg
-	responseTimer = time.NewTicker(6 * time.Second)
+	responseTimer = time.NewTicker(10 * time.Second)
 	//responseTimer := time.NewTicker(5 * time.Second)
 	//msgSent = true
 }
@@ -264,8 +264,9 @@ func reconnect(rMsg network.Message, val multipaxos.Value, timeout bool) {
 		testID := currentConn - 1
 		if testID < 0 {
 			currentConn = len(networkNodes) - 1
+		} else {
+			currentConn = testID
 		}
-		currentConn = testID
 		if cSeq == reqSeq {
 			fmt.Printf("Timeout, reconnecting to new node %d\n", currentConn)
 			syncTxRx(val, "Timeout")
