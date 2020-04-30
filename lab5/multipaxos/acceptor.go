@@ -38,8 +38,8 @@ func NewAcceptor(id int, promiseOut chan<- Promise, learnOut chan<- Learn) *Acce
 
 		promiseChanOut: promiseOut,
 		learnChanOut:   learnOut,
-		prepareChanIn:  make(chan Prepare, 30000000000000000),
-		acceptChanIn:   make(chan Accept, 30000000000000000),
+		prepareChanIn:  make(chan Prepare, 65535),
+		acceptChanIn:   make(chan Accept, 65535),
 		stop:           make(chan struct{}),
 	}
 }

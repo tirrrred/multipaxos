@@ -38,7 +38,7 @@ func NewLearner(id int, nrOfNodes int, decidedOut chan<- DecidedValue) *Learner 
 		lrnSent:  make(map[SlotID]bool),
 
 		decidedChanOut: decidedOut,
-		learnChanIn:    make(chan Learn, 30000000000000000),
+		learnChanIn:    make(chan Learn, 4294967),
 		stop:           make(chan struct{}),
 	}
 }

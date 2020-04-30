@@ -87,8 +87,8 @@ func NewProposer(id, nrOfNodes, adu int, ld detector.LeaderDetector, prepareOut 
 
 		prepareOut: prepareOut,
 		acceptOut:  acceptOut,
-		promiseIn:  make(chan Promise, 3000000000000000),
-		cvalIn:     make(chan Value, 3000000000000000),
+		promiseIn:  make(chan Promise, 429496),
+		cvalIn:     make(chan Value, 429496),
 
 		incDcd: make(chan struct{}),
 		stop:   make(chan struct{}),

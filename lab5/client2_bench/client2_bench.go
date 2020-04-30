@@ -28,8 +28,8 @@ var (
 	currentConn    = -1                         //Which node are we connected to now
 	connTable      = make(map[int]*net.TCPConn) //Map with TCPconnection to different nodes
 	networkNodes   = []network.Node{}
-	ReceiveChan    = make(chan network.Message, 30000000000000000) //Create channels
-	SendChan       = make(chan network.Message, 30000000000000000) //Create channels
+	ReceiveChan    = make(chan network.Message, 429496) //Create channels
+	SendChan       = make(chan network.Message, 429496) //Create channels
 	responseOK     = true
 	responseTimer  *time.Ticker
 	mu             sync.Mutex
