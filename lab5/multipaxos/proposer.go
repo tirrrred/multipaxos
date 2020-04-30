@@ -5,7 +5,6 @@ package multipaxos
 import (
 	"container/list"
 	"dat520/lab3/detector"
-	"fmt"
 	"sort"
 	"time"
 )
@@ -116,7 +115,7 @@ func (p *Proposer) Start() {
 				}
 				p.sendAccept()
 			case cval := <-p.cvalIn:
-				fmt.Printf("Proposer: Got clientValue with ClientSeq %d\n", cval.ClientSeq)
+				//fmt.Printf("Proposer: Got clientValue with ClientSeq %d\n", cval.ClientSeq)
 				if p.id != p.leader {
 					continue
 				}
