@@ -28,8 +28,8 @@ var (
 	currentConn    = -1                         //Which node are we connected to now
 	connTable      = make(map[int]*net.TCPConn) //Map with TCPconnection to different nodes
 	networkNodes   = []network.Node{}
-	ReceiveChan    = make(chan network.Message, 3000) //Create channels
-	SendChan       = make(chan network.Message, 3000) //Create channels
+	ReceiveChan    = make(chan network.Message, 300000) //Create channels
+	SendChan       = make(chan network.Message, 300000) //Create channels
 	responseOK     = true
 	responseTimer  *time.Ticker
 	mu             sync.Mutex
@@ -95,6 +95,12 @@ func main() {
 		case sMsg := <-SendChan:
 			switch sMsg.Type {
 			case "Value":
+				fmt.Printf("Client: Sending transaction to node %d: \nAccount: %d | %v: %d\n", sMsg.To, sMsg.Value.AccountNum, sMsg.Value.Txn.Op, sMsg.Value.Txn.Amount)
+				err := sendMessage(currentConn, sMsg)
+				if err != nil {
+					log.Print(err)
+				}
+			case "Timeout":
 				fmt.Printf("Client: Sending transaction to node %d: \nAccount: %d | %v: %d\n", sMsg.To, sMsg.Value.AccountNum, sMsg.Value.Txn.Op, sMsg.Value.Txn.Amount)
 				err := sendMessage(currentConn, sMsg)
 				if err != nil {
