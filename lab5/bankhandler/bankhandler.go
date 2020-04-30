@@ -58,7 +58,9 @@ func (bh *BankHandler) HandleDecidedValue(dVal multipaxos.DecidedValue) {
 			}
 		}
 		bankAccount := bh.bankAccounts[accountID]
+		fmt.Printf("Before processing transactions: AccountID %d, Operation %v, Amount %d, Balance %d", accountID, dVal.Value.Txn.Op, dVal.Value.Txn.Amount, bankAccount.Balance)
 		transRes := bankAccount.Process(dVal.Value.Txn)
+		fmt.Printf("After processing transactions: AccountID %d, Operation %v, Amount %d, Balance %d", transRes.AccountNum, dVal.Value.Txn.Op, dVal.Value.Txn.Amount, transRes.Balance)
 		response := multipaxos.Response{
 			ClientID:  dVal.Value.ClientID,
 			ClientSeq: dVal.Value.ClientSeq,
