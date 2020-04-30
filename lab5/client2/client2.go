@@ -198,7 +198,7 @@ func syncTxRx(val multipaxos.Value, msgType string) {
 	//fmt.Println("syncTxRx  reSeq = seqNum: ", reqSeq, seqNum)
 	msg := network.Message{
 		To:    currentConn,
-		Type:  "Value",
+		Type:  msgType,
 		Value: val,
 	}
 	SendChan <- msg
@@ -267,7 +267,7 @@ func reconnect(rMsg network.Message, val multipaxos.Value, timeout bool) {
 		}
 		currentConn = testID
 		if cSeq == reqSeq {
-			fmt.Printf("Reconnected to new node %d - Resending message\n", currentConn)
+			fmt.Printf("Timeout, reconnecting to new node %d\n", currentConn)
 			syncTxRx(val, "Timeout")
 			return
 		}
