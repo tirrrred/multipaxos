@@ -73,9 +73,9 @@ var mutex = &sync.Mutex{}
 
 //InitNetwork defines necessary parameteres about the network
 func InitNetwork(nodes []Node, myself int) (network Network, err error) {
-	rC := make(chan Message, 30000000000000000) //Increased for TS
-	sC := make(chan Message, 30000000000000000) //Increased for TS
-	ccC := make(chan *net.TCPConn, 30000000000000000)
+	rC := make(chan Message, 65535) //Increased for TS
+	sC := make(chan Message, 65535) //Increased for TS
+	ccC := make(chan *net.TCPConn, 65535)
 	network = Network{
 		Nodes:          []Node{},
 		Connections:    map[int]*net.TCPConn{},
