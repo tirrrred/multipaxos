@@ -30,7 +30,7 @@ func main() {
 	}
 	ld := detector.NewMonLeaderDetector(netconf.Proposers) //*MonLeaderDetector
 	//create failure detector
-	hbSend := make(chan detector.Heartbeat, 30000000000000000)
+	hbSend := make(chan detector.Heartbeat, 4294967)
 	fd := detector.NewEvtFailureDetector(appnet.Myself.ID, nodeIDs, ld, 2*time.Second, hbSend) //2 second timeout for failure detector - Increase/Decrease?
 	//subscribe to leader changes
 	ldChan := ld.Subscribe()
@@ -51,21 +51,21 @@ func main() {
 	//Implement PAXOS roles:
 	if iAMa(netconf.Proposers, appnet.Myself.ID) { //If I'am a proposer
 		fmt.Println("I am a PROPOSER!")
-		prepareOutChan = make(chan multipaxos.Prepare, 30000000000000000)
-		acceptOutChan = make(chan multipaxos.Accept, 30000000000000000)
+		prepareOutChan = make(chan multipaxos.Prepare, 4294967)
+		acceptOutChan = make(chan multipaxos.Accept, 4294967)
 		proposer = multipaxos.NewProposer(appnet.Myself.ID, len(netconf.Acceptors), -1, ld, prepareOutChan, acceptOutChan) //NewProposer func(id int, nrOfNodes int, ld detector.LeaderDetector, prepareOut chan<- Prepare, acceptOut chan<- Accept) *Proposer
 		proposer.Start()
 	}
 	if iAMa(netconf.Acceptors, appnet.Myself.ID) { //If I'am a acceptor
 		fmt.Println("I am a ACCEPTOR!")
-		promiseOutChan = make(chan multipaxos.Promise, 30000000000000000)
-		learnOutChan = make(chan multipaxos.Learn, 30000000000000000)
+		promiseOutChan = make(chan multipaxos.Promise, 4294967)
+		learnOutChan = make(chan multipaxos.Learn, 4294967)
 		acceptor = multipaxos.NewAcceptor(appnet.Myself.ID, promiseOutChan, learnOutChan) //NewAcceptor func(id int, promiseOut chan<- Promise, learnOut chan<- Learn) *Acceptor
 		acceptor.Start()
 	}
 	if iAMa(netconf.Learners, appnet.Myself.ID) { //If I'am a learner
 		fmt.Println("I am a LEARNER!")
-		decidedOutChan = make(chan multipaxos.DecidedValue, 30000000000000000)
+		decidedOutChan = make(chan multipaxos.DecidedValue, 4294967)
 		//valueOutChan = make(chan multipaxos.Value, 3000)
 		learner = multipaxos.NewLearner(appnet.Myself.ID, len(netconf.Acceptors), decidedOutChan) //NewLearner func(id int, nrOfNodes int, valueOut chan<- Value) *Learner
 		learner.Start()
@@ -85,7 +85,7 @@ func main() {
 	clihandler.Start()
 
 	//Implement Bank Handler:
-	responseOutChan := make(chan multipaxos.Response, 30000000000000000)
+	responseOutChan := make(chan multipaxos.Response, 4294967)
 	bankhandler := bankhandler.NewBankHandler(responseOutChan, proposer)
 
 	//done channel to receive os signal (like ctrl+c). Should close TCP connections correctly
