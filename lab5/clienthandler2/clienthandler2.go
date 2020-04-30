@@ -61,7 +61,12 @@ func (ch *ClientHandler) Start() {
 				}
 				ch.proposer.DeliverClientValue(cliVal)
 			case cliTimeVal := <-ch.ClientTimeoutChanIn:
-				ch.proposer.DeliverClientValue(cliTimeVal)
+				if ch.id == ch.leader {
+					ch.proposer.DeliverClientValue(cliTimeVal)
+					continue
+				}
+				fmt.Println("I'm not leader - redirect to leader:", ch.leader)
+				ch.Redirect(cliTimeVal)
 			case response := <-ch.responseChanIn:
 				ch.SendResToCli(response)
 			case newLeader := <-ldCHG:
