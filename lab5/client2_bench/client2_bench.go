@@ -132,7 +132,7 @@ func inputToValue(input string, id string) (val multipaxos.Value, err error) {
 	mu.Lock()
 	defer mu.Unlock()
 	commands := strings.Fields(input)
-	fmt.Println(commands, len(commands))
+	//fmt.Println(commands, len(commands))
 
 	if len(commands) == 2 { //If numbers of commands equals two the operation should be balance followed by account number (i.e no amount)
 		accountStr := commands[1]
